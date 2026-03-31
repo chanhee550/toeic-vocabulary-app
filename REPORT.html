@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>TOEIC 영단어장 - 개발 보고서</title>
+<style>
+  @page { margin: 20mm 18mm; size: A4; }
+  body {
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    font-size: 11pt; line-height: 1.8; color: #222;
+    max-width: 720px; margin: 0 auto; padding: 40px 20px;
+  }
+  h1 { font-size: 20pt; color: #1a237e; border-bottom: 3px solid #1a237e; padding-bottom: 10px; margin-bottom: 24px; }
+  h2 { font-size: 15pt; color: #283593; margin-top: 32px; margin-bottom: 12px; border-left: 4px solid #3f51b5; padding-left: 12px; }
+  h3 { font-size: 12pt; color: #37474f; margin-top: 20px; margin-bottom: 8px; }
+  p { margin: 8px 0; text-align: justify; }
+  ul, ol { margin: 8px 0 8px 20px; }
+  li { margin: 4px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+  th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; font-size: 10pt; }
+  th { background: #e8eaf6; font-weight: bold; }
+  tr:nth-child(even) td { background: #fafafa; }
+  code { background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-size: 10pt; font-family: 'Consolas', monospace; }
+  strong { color: #1a237e; }
+  hr { border: none; border-top: 1px solid #ddd; margin: 24px 0; }
+  @media print {
+    body { padding: 0; }
+    h1, h2 { page-break-after: avoid; }
+    table { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<h1>TOEIC 영단어장 - 개발 보고서</h1>
+<h2>1. 프로젝트 개요</h2>
+<p>TOEIC 시험 대비를 위한 영단어 학습 웹 애플리케이션을 개발하였다. 별도의 서버나 프레임워크 없이 순수 HTML/CSS/JavaScript만으로 구현하여, HTML 파일 하나만 브라우저에서 열면 즉시 학습이 가능하도록 설계하였다. PC용과 모바일용 두 가지 버전을 제공한다.</p>
+<h2>2. 개발 과정 요약</h2>
+<h3>2.1 데이터 수집 및 가공</h3>
+<ol>
+<li>dokjongban.com에서 제공하는 TOEIC 단어 PDF(<code>toeic_vocab.pdf</code>)로부터 단어 데이터를 추출</li>
+<li>추출한 데이터를 JSON 형식(<code>toeic_words.json</code>)으로 정리 (영단어, 한국어 뜻, IPA 발음 기호)</li>
+<li><code>gen_pronun.py</code> 스크립트를 작성하여 IPA 발음 기호를 영어식 발음 표기(respelling)로 자동 변환</li>
+</ol>
+<h3>2.2 애플리케이션 개발</h3>
+<ol>
+<li>Python 빌드 스크립트(<code>build_toeic.py</code>, <code>build_toeic_mobile.py</code>)를 작성하여 JSON 데이터를 HTML 내부에 임베딩</li>
+<li>단어 목록, 타이핑 학습, 테스트 모드 등 핵심 기능 구현</li>
+<li>Free Dictionary API와 MyMemory Translation API를 연동한 사전 조회 기능 추가</li>
+<li>다크/라이트 모드, 반응형 UI 등 사용자 편의 기능 구현</li>
+</ol>
+<h2>3. 주요 기술적 결정 및 해결 과제</h2>
+<h3>3.1 PDF 파싱을 통한 단어 추출</h3>
+<p>원본 TOEIC 단어 데이터는 PDF 형태로 제공되었다. PDF에서 영단어, 한국어 뜻, 품사 정보를 정확히 추출하여 구조화된 JSON 데이터로 변환하는 과정이 필요했다.</p>
+<h3>3.2 단일 HTML 파일 아키텍처</h3>
+<p>서버 없이 동작하는 것을 핵심 설계 목표로 삼았다. Python 빌드 스크립트가 JSON 단어 데이터를 JavaScript 변수로 변환하여 HTML 파일 내부에 직접 삽입한다. 이를 통해 HTML 파일 하나만으로 완전한 애플리케이션이 동작하며, 별도의 웹 서버나 빌드 도구가 필요 없다.</p>
+<h3>3.3 테스트 모드의 동의어 감지</h3>
+<p>한→영 타이핑 테스트에서 사용자가 정답과 다른 단어를 입력했더라도, 해당 단어가 단어 목록에 존재하고 뜻(한국어 키워드)이 유사한 경우 동의어로 인정하는 로직을 구현하였다. 한국어 뜻에서 키워드를 추출하고, 두 단어 간 키워드가 겹치는지 비교하여 판별한다.</p>
+<h3>3.4 영→한 테스트의 4지선다 구현</h3>
+<p>영→한 테스트는 타이핑이 아닌 4지선다 객관식으로 설계하였다. 영단어를 보고 올바른 한국어 뜻을 4개의 선택지 중에서 고르는 방식이다. 오답 선택지는 전체 단어 목록에서 무작위로 추출하여 자연스러운 난이도를 유지한다.</p>
+<h3>3.5 카테고리 시스템</h3>
+<p>각 단어를 <code>학습완료(learned)</code>, <code>헷갈림(confused)</code>, <code>미학습(none)</code> 3가지 상태로 분류할 수 있다. 카드를 클릭하면 상태가 순환하며, 학습 및 테스트 시 특정 카테고리의 단어만 선별하여 집중 학습이 가능하다.</p>
+<h3>3.6 localStorage를 활용한 데이터 영속성</h3>
+<p>서버가 없으므로 모든 사용자 데이터를 브라우저의 localStorage에 저장한다. 저장 항목은 다음과 같다:</p>
+<ul>
+<li><code>toeic_word_status</code>: 각 단어의 학습 상태 (learned/confused/none)</li>
+<li><code>toeic_settings</code>: 학습 설정 (반복 횟수, 순서, 뜻 표시 방식 등)</li>
+<li><code>toeic_custom_words</code>: 사용자가 추가한 커스텀 단어</li>
+<li><code>toeic_theme</code>: 다크/라이트 모드 설정</li>
+</ul>
+<h3>3.7 IPA 발음 표기 생성</h3>
+<p><code>gen_pronun.py</code> 스크립트에서 IPA(국제 음성 기호)를 영어 사용자에게 친숙한 발음 표기(respelling)로 변환한다. 이중 모음, 장모음, 파찰음 등을 우선 매칭하고, 강세 음절은 대문자로 표기하여 직관적인 발음 안내를 제공한다.</p>
+<h3>3.8 무료 API 연동 (사전 + 번역)</h3>
+<p>외부 API를 활용하여 추가적인 학습 정보를 제공한다:</p>
+<ul>
+<li><strong>Free Dictionary API</strong> (<code>dictionaryapi.dev</code>): 영영 사전 정의, 품사, 예문 조회</li>
+<li><strong>MyMemory Translation API</strong> (<code>mymemory.translated.net</code>): 영어 정의를 한국어로 자동 번역</li>
+</ul>
+<p>두 API 모두 무료이며 API 키가 필요 없어, 단일 HTML 파일 아키텍처에 적합하다.</p>
+<h3>3.9 반응형 디자인 (PC/모바일)</h3>
+<p>PC용과 모바일용을 별도의 HTML로 분리하여 각 환경에 최적화하였다:</p>
+<ul>
+<li><strong>PC용</strong> (<code>toeic-typing.html</code>): 넓은 화면에 맞는 그리드 레이아웃, 상단 탭 네비게이션</li>
+<li><strong>모바일용</strong> (<code>toeic-mobile.html</code>): 하단 탭 네비게이션, 터치 최적화 UI, safe-area 대응, 스크롤 스냅 등 모바일 UX 고려</li>
+</ul>
+<h2>4. 최종 산출물</h2>
+<table>
+<thead>
+<tr>
+<th>파일</th>
+<th>설명</th>
+<th>크기</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>toeic-typing.html</code></td>
+<td>PC용 영단어장 (단어 데이터 내장)</td>
+<td>~327KB</td>
+</tr>
+<tr>
+<td><code>toeic-mobile.html</code></td>
+<td>모바일용 영단어장 (단어 데이터 내장)</td>
+<td>~301KB</td>
+</tr>
+<tr>
+<td><code>toeic_words.json</code></td>
+<td>전체 단어 데이터 (IPA, 발음 표기 포함)</td>
+<td>~306KB</td>
+</tr>
+<tr>
+<td><code>build_toeic.py</code></td>
+<td>PC용 HTML 빌드 스크립트</td>
+<td>~76KB</td>
+</tr>
+<tr>
+<td><code>build_toeic_mobile.py</code></td>
+<td>모바일용 HTML 빌드 스크립트</td>
+<td>~52KB</td>
+</tr>
+<tr>
+<td><code>gen_pronun.py</code></td>
+<td>IPA → 발음 표기 변환 스크립트</td>
+<td>~5KB</td>
+</tr>
+</tbody>
+</table>
+<h2>5. 향후 개선 가능 사항</h2>
+<ul>
+<li><strong>PWA (Progressive Web App) 전환</strong>: Service Worker를 추가하여 오프라인 설치 및 사용 지원</li>
+<li><strong>단어 확장</strong>: 현재 수록된 단어 외에 추가 TOEIC 빈출 단어 확대</li>
+<li><strong>학습 통계 대시보드</strong>: 일별/주별 학습량, 정답률 추이 등의 통계 시각화</li>
+<li><strong>간격 반복 학습 (Spaced Repetition)</strong>: 에빙하우스 망각 곡선 기반의 자동 복습 스케줄링</li>
+<li><strong>데이터 내보내기/가져오기</strong>: 학습 데이터를 JSON으로 백업 및 복원하는 기능</li>
+<li><strong>예문 학습 모드</strong>: 단어를 문장 속에서 학습할 수 있는 모드 추가</li>
+<li><strong>PC/모바일 통합</strong>: 단일 HTML로 반응형 디자인 통합</li>
+</ul>
+<hr />
+<p>작성자: <strong>김찬희 (Kim Chanhee)</strong>
+라이선스: MIT</p>
+</body>
+</html>
