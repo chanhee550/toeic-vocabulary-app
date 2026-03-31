@@ -422,6 +422,24 @@ html_part1 = """<!DOCTYPE html>
     font-weight: 600;
   }
 
+  /* ===== TEST CHAR BOXES ===== */
+  .test-char-boxes {
+    display: flex; justify-content: center; gap: 5px;
+    margin-bottom: 16px; min-height: 0; flex-wrap: wrap;
+  }
+  .test-char-box {
+    width: 38px; height: 46px; display: flex; align-items: center;
+    justify-content: center; font-size: 1.25rem; font-weight: 600;
+    border-radius: var(--radius-sm); border: 2px solid var(--border);
+    background: var(--bg-card); color: var(--text-dim);
+    font-family: 'Inter', monospace; transition: all 0.15s;
+  }
+  .test-char-box.tc-filled { color: var(--text-primary); border-color: var(--border-hover); }
+  .test-char-box.tc-correct { color: var(--green); border-color: var(--green-border); background: var(--green-bg); }
+  .test-char-box.tc-wrong { color: var(--red); border-color: var(--red-border); background: var(--red-bg); }
+  .test-char-box.tc-current { border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+  .test-char-box.tc-empty { color: var(--text-dim); }
+
   /* ===== LIGHT MODE ===== */
   body.light {
     --bg-primary: #f5f6fa;
@@ -689,6 +707,7 @@ html_part1 = """<!DOCTYPE html>
       <div class="test-question" id="testQuestion"></div>
       <div class="test-question-sub" id="testQuestionSub"></div>
       <div id="testTypingArea">
+        <div class="test-char-boxes" id="testCharBoxes"></div>
         <input type="text" class="test-input" id="testInput" placeholder="정답을 입력하세요" autocomplete="off" spellcheck="false">
       </div>
       <div id="testChoicesArea" style="display:none;"></div>
@@ -1408,7 +1427,8 @@ function showTestQuestion() {
   if (testType === 'kor-to-eng') {
     document.getElementById('testQuestionLabel').textContent = '다음 뜻에 해당하는 영단어를 입력하세요';
     document.getElementById('testQuestion').textContent = word.meaning;
-    document.getElementById('testQuestionSub').textContent = word.word.length + '글자';
+    document.getElementById('testQuestionSub').textContent = '';
+    document.getElementById('testCharBoxes').innerHTML = '';
     document.getElementById('testTypingArea').style.display = 'block';
     document.getElementById('testChoicesArea').style.display = 'none';
     document.getElementById('testSubmitBtn').style.display = 'inline-block';
@@ -1469,10 +1489,36 @@ function isSynonym(typed, targetWord) {
 
 function showTestHint() {
   var word = testQuestions[testIndex];
-  var hint = word.word[0] + '_'.repeat(word.word.length - 1);
-  document.getElementById('testHintArea').innerHTML =
-    '<span style="color:#60a5fa; font-size:1.2rem; letter-spacing:3px; font-weight:bold;">' + hint + '</span>' +
-    ' <span style="color:#64748b;">(' + word.word.length + '글자)</span>';
+  var inp = document.getElementById('testInput');
+  // Show first letter in char boxes
+  renderTestCharBoxes('testCharBoxes', word.word, word.word[0]);
+  inp.value = word.word[0];
+  inp.focus();
+  // Remove old hint area text
+  var hintArea = document.getElementById('testHintArea');
+  if (hintArea) hintArea.innerHTML = '<span style="color:var(--text-dim);font-size:0.82rem;">첫 글자 힌트가 표시되었습니다</span>';
+}
+
+function renderTestCharBoxes(containerId, targetWord, typedValue) {
+  var container = document.getElementById(containerId);
+  if (!container) return;
+  var h = '';
+  for (var i = 0; i < targetWord.length; i++) {
+    var cls = 'test-char-box';
+    var display = '';
+    if (i < typedValue.length) {
+      display = typedValue[i];
+      cls += typedValue[i].toLowerCase() === targetWord[i].toLowerCase() ? ' tc-correct tc-filled' : ' tc-wrong tc-filled';
+    } else if (i === typedValue.length) {
+      cls += ' tc-current';
+      display = '_';
+    } else {
+      cls += ' tc-empty';
+      display = '_';
+    }
+    h += '<div class="' + cls + '">' + display + '</div>';
+  }
+  container.innerHTML = h;
 }
 
 function submitTestAnswer() {
@@ -1616,6 +1662,11 @@ document.getElementById('testInput').addEventListener('keydown', function(e) {
     } else {
       nextTestQuestion();
     }
+  }
+});
+document.getElementById('testInput').addEventListener('input', function() {
+  if (testType === 'kor-to-eng' && testQuestions[testIndex] && document.getElementById('testCharBoxes').innerHTML !== '') {
+    renderTestCharBoxes('testCharBoxes', testQuestions[testIndex].word, this.value);
   }
 });
 

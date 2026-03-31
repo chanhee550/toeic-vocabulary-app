@@ -297,6 +297,17 @@
   .empty-msg .em-text { color: var(--amber); font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
   .empty-msg .em-sub { color: var(--t2); font-size: 0.88rem; }
 
+  .test-char-boxes { display:flex; justify-content:center; gap:4px; margin-bottom:14px; min-height:0; flex-wrap:wrap; }
+  .test-char-box {
+    width:32px; height:40px; display:flex; align-items:center; justify-content:center;
+    font-size:1.05rem; font-weight:600; border-radius:6px; border:2px solid var(--border);
+    background:var(--bg-card); color:var(--t3); font-family:'Inter',monospace; transition:all 0.15s;
+  }
+  .test-char-box.tc-filled { color:var(--t1); border-color:var(--border-h); }
+  .test-char-box.tc-correct { color:var(--green); border-color:var(--green-bd); background:var(--green-bg); }
+  .test-char-box.tc-wrong { color:var(--red); border-color:var(--red-bd); background:var(--red-bg); }
+  .test-char-box.tc-current { border-color:var(--acc); box-shadow:0 0 8px var(--acc-glow); }
+  .test-char-box.tc-empty { color:var(--t3); }
   .fc { color: var(--green); } .fw { color: var(--red); } .fi { color: var(--acc); }
   .hidden { display: none !important; }
 </style>
@@ -417,7 +428,7 @@
     <div class="lc-progress"><span class="lc-ptext" id="tqLeft"></span><div class="lc-pbar"><div class="lc-pfill" id="tqBar"></div></div><span class="lc-ptext" id="tqRight"></span></div>
     <div class="tq-label" id="tqLabel"></div>
     <div class="tq-text" id="tqText"></div>
-    <div id="tqTypingArea"><input type="text" class="tq-input" id="tqInput" autocomplete="off" spellcheck="false" placeholder="정답 입력"></div>
+    <div id="tqTypingArea"><div class="test-char-boxes" id="tqCharBoxes"></div><input type="text" class="tq-input" id="tqInput" autocomplete="off" spellcheck="false" placeholder="정답 입력"></div>
     <div id="tqChoiceArea" class="hidden"></div>
     <div class="tq-reveal" id="tqReveal"></div>
     <button class="tq-btn" id="tqSubmit" onclick="mSubmitTest()">확인</button>
@@ -704,7 +715,8 @@ function mShowTestQ(){
   document.getElementById('tqNext').classList.add('hidden');
   document.getElementById('tqSubmit').classList.remove('hidden');
   if(tType==='kor-to-eng'){
-    document.getElementById('tqLabel').textContent='뜻에 해당하는 영단어를 입력하세요 (' + w.word.length + '글자)';
+    document.getElementById('tqLabel').textContent='뜻에 해당하는 영단어를 입력하세요';
+    document.getElementById('tqCharBoxes').innerHTML='';
     document.getElementById('tqText').textContent=w.meaning;
     document.getElementById('tqTypingArea').classList.remove('hidden');
     document.getElementById('tqChoiceArea').classList.add('hidden');
@@ -762,7 +774,21 @@ function isSyn(typed,target){
 }
 function mShowHint(){
   var w=tQs[tIdx];
-  document.getElementById('tqHintArea').innerHTML='<span style="color:var(--acc);font-size:1.15rem;letter-spacing:3px;font-weight:700;">'+w.word[0]+'_'.repeat(w.word.length-1)+'</span> <span style="color:var(--t3);">('+w.word.length+'글자)</span>';
+  mRenderTestCharBoxes('tqCharBoxes',w.word,w.word[0]);
+  var inp=document.getElementById('tqInput');inp.value=w.word[0];inp.focus();
+  var ha=document.getElementById('tqHintArea');
+  if(ha) ha.innerHTML='<span style="color:var(--t3);font-size:0.8rem;">첫 글자 힌트가 표시되었습니다</span>';
+}
+function mRenderTestCharBoxes(cid,target,typed){
+  var c=document.getElementById(cid);if(!c)return;var h='';
+  for(var i=0;i<target.length;i++){
+    var cls='test-char-box',d='';
+    if(i<typed.length){d=typed[i];cls+=typed[i].toLowerCase()===target[i].toLowerCase()?' tc-correct tc-filled':' tc-wrong tc-filled';}
+    else if(i===typed.length){cls+=' tc-current';d='_';}
+    else{cls+=' tc-empty';d='_';}
+    h+='<div class="'+cls+'">'+d+'</div>';
+  }
+  c.innerHTML=h;
 }
 function mSubmitTest(){
   if(tAnswered)return;
@@ -793,6 +819,11 @@ function mSubmitTest(){
 function mNextTest(){tIdx++;mShowTestQ();}
 document.getElementById('tqInput').addEventListener('keydown',function(e){
   if(e.key==='Enter'){if(!tAnswered)mSubmitTest();else mNextTest();}
+});
+document.getElementById('tqInput').addEventListener('input',function(){
+  if(tType==='kor-to-eng'&&tQs[tIdx]&&document.getElementById('tqCharBoxes').innerHTML!==''){
+    mRenderTestCharBoxes('tqCharBoxes',tQs[tIdx].word,this.value);
+  }
 });
 function mShowTestResult(){
   document.getElementById('testAreaM').classList.add('hidden');
