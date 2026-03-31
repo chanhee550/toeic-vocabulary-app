@@ -110,9 +110,18 @@ unified = '''<!DOCTYPE html>
 </style>
 
 <style>
-/* Toggle visibility */
-#pc-ver { display: none; }
+/* Default: show PC, hide mobile */
+#pc-ver { display: block; }
 #mobile-ver { display: none; }
+/* On small screens: show mobile, hide PC */
+@media (max-width: 768px) {
+  #pc-ver { display: none !important; }
+  #mobile-ver { display: block !important; }
+}
+@media (min-width: 769px) {
+  #pc-ver { display: block !important; }
+  #mobile-ver { display: none !important; }
+}
 </style>
 </head>
 <body>
@@ -132,16 +141,16 @@ unified = '''<!DOCTYPE html>
 
 <script>
 // ===== DEVICE DETECTION & VERSION SWITCH =====
-var _isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-  || (navigator.maxTouchPoints > 1 && window.innerWidth < 1024);
+var _isMobile = window.innerWidth <= 768;
 
-if (_isMobile) {
-  document.getElementById('mobile-ver').style.display = 'block';
-  document.getElementById('pcStyles').disabled = true;
-} else {
-  document.getElementById('pc-ver').style.display = 'block';
-  document.getElementById('mobStyles').disabled = true;
-}
+// CSS media queries handle visibility, JS just disables unused stylesheets for performance
+try {
+  if (_isMobile) {
+    document.getElementById('pcStyles').disabled = true;
+  } else {
+    document.getElementById('mobStyles').disabled = true;
+  }
+} catch(e) {}
 
 // ===== TEST CHAR BOX RENDERER (shared) =====
 function renderTestCharBoxes(containerId, targetWord, typedValue) {
