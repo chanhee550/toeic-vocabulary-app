@@ -1363,7 +1363,15 @@ function selectChoice(idx) {
   if (isCorrect) {
     document.getElementById('testAnswerReveal').innerHTML = '<span class="feedback-correct">정답!</span>';
   } else {
-    document.getElementById('testAnswerReveal').innerHTML = '<span class="feedback-wrong">오답!</span> <span style="color:#94a3b8;">정답: <strong style="color:#60a5fa;">' + word.word + '</strong> ' + word.meaning + '</span>';
+    var rHtml = '<span class="feedback-wrong">오답!</span> <span style="color:var(--text-secondary,#94a3b8);">정답: <strong style="color:var(--accent,#60a5fa);">' + word.word + '</strong> ' + word.meaning + '</span>';
+    if (getWordStatus(word.word) === 'learned') {
+      rHtml += '<div style="margin-top:10px;padding:10px;background:var(--amber-bg,rgba(251,191,36,0.08));border:1px solid var(--amber-border,rgba(251,191,36,0.3));border-radius:8px;">';
+      rHtml += '<div style="color:var(--amber,#fbbf24);font-size:0.88rem;margin-bottom:8px;">학습 완료 단어인데 틀렸습니다. 헷갈리는 단어로 이동할까요?</div>';
+      rHtml += '<button onclick="moveToConfused(&apos;' + word.word + '&apos;,this)" style="padding:6px 16px;background:var(--amber,#fbbf24);color:#451a03;border:none;border-radius:6px;cursor:pointer;font-size:0.82rem;font-weight:600;font-family:inherit;margin-right:6px;">이동</button>';
+      rHtml += '<button onclick="this.parentElement.style.display=&apos;none&apos;" style="padding:6px 16px;background:var(--bg-elevated,#1c2137);color:var(--text-secondary,#8b92ab);border:1px solid var(--border,#2a3050);border-radius:6px;cursor:pointer;font-size:0.82rem;font-family:inherit;">유지</button>';
+      rHtml += '</div>';
+    }
+    document.getElementById('testAnswerReveal').innerHTML = rHtml;
   }
 
   document.getElementById('testSubmitBtn').style.display = 'none';
@@ -1392,7 +1400,7 @@ function showTestQuestion() {
   if (testType === 'kor-to-eng') {
     document.getElementById('testQuestionLabel').textContent = '다음 뜻에 해당하는 영단어를 입력하세요';
     document.getElementById('testQuestion').textContent = word.meaning;
-    document.getElementById('testQuestionSub').textContent = '';
+    document.getElementById('testQuestionSub').textContent = word.word.length + '글자';
     document.getElementById('testTypingArea').style.display = 'block';
     document.getElementById('testChoicesArea').style.display = 'none';
     document.getElementById('testSubmitBtn').style.display = 'inline-block';
@@ -1514,12 +1522,27 @@ function submitTestAnswer() {
     var revealHtml = '<span class="feedback-wrong">오답</span><br>';
     revealHtml += '<span class="answer-word">' + word.word + '</span> ';
     revealHtml += '<span class="answer-meaning">' + word.meaning + '</span>';
+    // 학습완료 단어가 오답이면 헷갈리는 단어로 이동 제안
+    if (getWordStatus(word.word) === 'learned') {
+      revealHtml += '<div style="margin-top:10px;padding:10px;background:var(--amber-bg,rgba(251,191,36,0.08));border:1px solid var(--amber-border,rgba(251,191,36,0.3));border-radius:8px;">';
+      revealHtml += '<div style="color:var(--amber,#fbbf24);font-size:0.88rem;margin-bottom:8px;">학습 완료 단어인데 틀렸습니다. 헷갈리는 단어로 이동할까요?</div>';
+      revealHtml += '<button onclick="moveToConfused(&apos;' + word.word + '&apos;,this)" style="padding:6px 16px;background:var(--amber,#fbbf24);color:#451a03;border:none;border-radius:6px;cursor:pointer;font-size:0.82rem;font-weight:600;font-family:inherit;margin-right:6px;">이동</button>';
+      revealHtml += '<button onclick="this.parentElement.style.display=&apos;none&apos;" style="padding:6px 16px;background:var(--bg-elevated,#1c2137);color:var(--text-secondary,#8b92ab);border:1px solid var(--border,#2a3050);border-radius:6px;cursor:pointer;font-size:0.82rem;font-family:inherit;">유지</button>';
+      revealHtml += '</div>';
+    }
     document.getElementById('testAnswerReveal').innerHTML = revealHtml;
   }
 
   document.getElementById('testSubmitBtn').style.display = 'none';
   document.getElementById('testNextBtn').style.display = 'inline-block';
   document.getElementById('testNextBtn').focus();
+}
+
+function moveToConfused(word, btn) {
+  wordStatus[word] = 'confused';
+  saveWordStatus();
+  updateHeaderStats();
+  btn.parentElement.innerHTML = '<span style="color:var(--green,#4ade80);font-size:0.85rem;">헷갈리는 단어로 이동 완료!</span>';
 }
 
 function nextTestQuestion() {

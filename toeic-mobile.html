@@ -704,7 +704,7 @@ function mShowTestQ(){
   document.getElementById('tqNext').classList.add('hidden');
   document.getElementById('tqSubmit').classList.remove('hidden');
   if(tType==='kor-to-eng'){
-    document.getElementById('tqLabel').textContent='뜻에 해당하는 영단어를 입력하세요';
+    document.getElementById('tqLabel').textContent='뜻에 해당하는 영단어를 입력하세요 (' + w.word.length + '글자)';
     document.getElementById('tqText').textContent=w.meaning;
     document.getElementById('tqTypingArea').classList.remove('hidden');
     document.getElementById('tqChoiceArea').classList.add('hidden');
@@ -733,7 +733,19 @@ function mSelectChoice(idx){
     else btns[i].classList.add('ch-dim');
     btns[i].style.pointerEvents='none';
   }
-  document.getElementById('tqReveal').innerHTML=ok?'<span class="fc">정답!</span>':'<span class="fw">오답!</span> 정답: <b style="color:var(--acc);">'+w.word+'</b>';
+  if(ok){
+    document.getElementById('tqReveal').innerHTML='<span class="fc">정답!</span>';
+  } else {
+    var rh='<span class="fw">오답!</span> 정답: <b style="color:var(--acc);">'+w.word+'</b>';
+    if(getWs(w.word)==='learned'){
+      rh+='<div style="margin-top:10px;padding:10px;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:8px;">';
+      rh+='<div style="color:var(--amber);font-size:0.85rem;margin-bottom:8px;">학습 완료 단어인데 틀렸습니다. 헷갈리는 단어로 이동할까요?</div>';
+      rh+='<button onclick="mMoveConfused(&apos;'+w.word+'&apos;,this)" style="padding:6px 14px;background:var(--amber);color:#451a03;border:none;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;font-family:inherit;margin-right:6px;">이동</button>';
+      rh+='<button onclick="this.parentElement.style.display=&apos;none&apos;" style="padding:6px 14px;background:var(--bg-el);color:var(--t2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:0.8rem;font-family:inherit;">유지</button>';
+      rh+='</div>';
+    }
+    document.getElementById('tqReveal').innerHTML=rh;
+  }
   document.getElementById('tqNext').classList.remove('hidden');
 }
 function isSyn(typed,target){
@@ -764,7 +776,17 @@ function mSubmitTest(){
   tAnswered=true;tSynRetry=false;
   tResults.push({word:w,typed:typed,correct:ok});
   if(ok){inp.className='tq-input correct';document.getElementById('tqReveal').innerHTML='<span class="fc">정답!</span>';}
-  else{inp.className='tq-input wrong';document.getElementById('tqReveal').innerHTML='<span class="fw">오답</span><br><b style="color:var(--acc);">'+w.word+'</b> <span style="color:var(--t2);">'+w.meaning+'</span>';}
+  else{
+    var rh='<span class="fw">오답</span><br><b style="color:var(--acc);">'+w.word+'</b> <span style="color:var(--t2);">'+w.meaning+'</span>';
+    if(getWs(w.word)==='learned'){
+      rh+='<div style="margin-top:10px;padding:10px;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:8px;">';
+      rh+='<div style="color:var(--amber);font-size:0.85rem;margin-bottom:8px;">학습 완료 단어인데 틀렸습니다. 헷갈리는 단어로 이동할까요?</div>';
+      rh+='<button onclick="mMoveConfused(&apos;'+w.word+'&apos;,this)" style="padding:6px 14px;background:var(--amber);color:#451a03;border:none;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;font-family:inherit;margin-right:6px;">이동</button>';
+      rh+='<button onclick="this.parentElement.style.display=&apos;none&apos;" style="padding:6px 14px;background:var(--bg-el);color:var(--t2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:0.8rem;font-family:inherit;">유지</button>';
+      rh+='</div>';
+    }
+    inp.className='tq-input wrong';document.getElementById('tqReveal').innerHTML=rh;
+  }
   document.getElementById('tqSubmit').classList.add('hidden');
   document.getElementById('tqNext').classList.remove('hidden');
 }
@@ -805,6 +827,8 @@ document.addEventListener('keydown',function(e){
   if(e.key>='1'&&e.key<='4'&&!tAnswered) mSelectChoice(+e.key-1);
   else if(e.key==='Enter'&&tAnswered) mNextTest();
 });
+
+function mMoveConfused(word,btn){ws[word]='confused';saveWs();updateStats();btn.parentElement.innerHTML='<span style="color:var(--green);font-size:0.82rem;">헷갈리는 단어로 이동 완료!</span>';}
 
 /* ===== DICTIONARY ===== */
 var posMap={noun:'명사',verb:'동사',adjective:'형용사',adverb:'부사',preposition:'전치사',conjunction:'접속사',interjection:'감탄사',pronoun:'대명사'};
