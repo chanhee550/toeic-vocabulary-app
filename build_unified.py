@@ -61,8 +61,8 @@ if (!_m) {
 
 unified = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"><title>TOEIC</title></head><body><script>\n'
 unified += 'var _m=/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&screen.width<768);\n'
-unified += 'var PC_PAGE=' + json.dumps(pc_clean) + ';\n'
-unified += 'var MOB_PAGE=' + json.dumps(mob_clean) + ';\n'
+unified += 'var PC_PAGE=' + json.dumps(pc_clean).replace('</script>', '<\\/script>') + ';\n'
+unified += 'var MOB_PAGE=' + json.dumps(mob_clean).replace('</script>', '<\\/script>') + ';\n'
 unified += 'document.open();document.write(_m?MOB_PAGE:PC_PAGE);document.close();\n'
 unified += '</'+'script></body></html>'
 
