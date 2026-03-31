@@ -534,7 +534,7 @@ function mRenderFilters(){
   for(var i=0;i<words.length;i++){var st=getWs(words[i].word);if(st==='learned')cl++;else if(st==='confused')cc++;else cn++;}
   var cats=[['all','전체',words.length],['none','미학습',cn],['learned','학습완료',cl],['confused','헷갈림',cc]];
   var h='';
-  cats.forEach(function(c){h+='<button class="filter-btn'+(mCatFilter===c[0]?' active':'')+'" onclick="mSetCat(this,\\''+c[0]+'\\')">'+c[1]+' <span style="color:var(--t3);font-size:0.7rem;">('+c[2]+')</span></button>';});
+  cats.forEach(function(c){h+='<button class="filter-btn'+(mCatFilter===c[0]?' active':'')+'" onclick="mSetCat(this,&apos;'+c[0]+'&apos;)">'+c[1]+' <span style="color:var(--t3);font-size:0.7rem;">('+c[2]+')</span></button>';});
   h+='<span style="color:var(--t3);font-size:0.68rem;white-space:nowrap;">1tap=완료 2tap=헷갈림 3tap=초기화</span>';
   document.getElementById('mFilters').innerHTML=h;
 }
