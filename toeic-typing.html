@@ -681,6 +681,13 @@
           <span style="color:#94a3b8; font-size:0.85rem;" id="testCategoryCount"></span>
         </div>
         <div class="settings-row">
+          <label>자릿수 표시:</label>
+          <label style="min-width:auto;cursor:pointer;display:flex;align-items:center;gap:6px;">
+            <input type="checkbox" id="testShowLength" style="width:18px;height:18px;cursor:pointer;accent-color:var(--accent,#6c8cff);">
+            <span style="color:var(--text-secondary,#8b92ab);font-size:0.85rem;">한→영 테스트 시 글자 수 박스 표시</span>
+          </label>
+        </div>
+        <div class="settings-row">
           <label>출제 범위:</label>
           <span style="color:#94a3b8; font-size:0.85rem;" id="testRangeInfo">현재 선택된 범위에서 출제</span>
         </div>
@@ -1420,7 +1427,12 @@ function showTestQuestion() {
     document.getElementById('testQuestionLabel').textContent = '다음 뜻에 해당하는 영단어를 입력하세요';
     document.getElementById('testQuestion').textContent = word.meaning;
     document.getElementById('testQuestionSub').textContent = '';
-    document.getElementById('testCharBoxes').innerHTML = '';
+    var showLen = document.getElementById('testShowLength') && document.getElementById('testShowLength').checked;
+    if (showLen) {
+      renderTestCharBoxes('testCharBoxes', word.word, '');
+    } else {
+      document.getElementById('testCharBoxes').innerHTML = '';
+    }
     document.getElementById('testTypingArea').style.display = 'block';
     document.getElementById('testChoicesArea').style.display = 'none';
     document.getElementById('testSubmitBtn').style.display = 'inline-block';

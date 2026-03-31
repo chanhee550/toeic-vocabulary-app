@@ -428,6 +428,7 @@ html_top = """<!DOCTYPE html>
       <div class="ls-row"><label>문제 수</label><select id="mTestCount"><option value="10">10</option><option value="20" selected>20</option><option value="30">30</option><option value="50">50</option><option value="all">전체</option></select></div>
       <div class="ls-row"><label>카테고리</label><select id="mTestCat" onchange="mUpdateTestInfo()"><option value="all">전체</option><option value="none">미학습</option><option value="learned">학습완료</option><option value="confused">헷갈림</option></select></div>
       <div class="ls-row"><label></label><span style="color:var(--t2);font-size:0.82rem;" id="mTestInfo"></span></div>
+      <div class="ls-row"><label>자릿수 표시</label><label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="mTestShowLen" style="width:18px;height:18px;cursor:pointer;accent-color:var(--acc);"><span style="color:var(--t2);font-size:0.82rem;">글자 수 박스 표시</span></label></div>
     </div>
     <button class="start-btn" id="mTestStartBtn" onclick="mStartTest()" disabled style="margin-top:12px;">테스트 시작</button>
   </div>
@@ -724,7 +725,8 @@ function mShowTestQ(){
   document.getElementById('tqSubmit').classList.remove('hidden');
   if(tType==='kor-to-eng'){
     document.getElementById('tqLabel').textContent='뜻에 해당하는 영단어를 입력하세요';
-    document.getElementById('tqCharBoxes').innerHTML='';
+    var mShowLen=document.getElementById('mTestShowLen')&&document.getElementById('mTestShowLen').checked;
+    if(mShowLen){mRenderTestCharBoxes('tqCharBoxes',w.word,'');}else{document.getElementById('tqCharBoxes').innerHTML='';}
     document.getElementById('tqText').textContent=w.meaning;
     document.getElementById('tqTypingArea').classList.remove('hidden');
     document.getElementById('tqChoiceArea').classList.add('hidden');
