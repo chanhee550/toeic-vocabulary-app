@@ -1166,7 +1166,7 @@
   <h1><span>TOEIC</span> 단어장</h1>
   <div class="topbar-right">
     <button class="topbar-btn" onclick="mOpenAdd()">+ 추가</button>
-    <button class="topbar-btn" id="themeBtn" onclick="toggleTheme()">Dark</button>
+    <button class="topbar-btn" id="mThemeBtn" onclick="toggleTheme()">Dark</button>
   </div>
 </div>
 
@@ -2451,11 +2451,11 @@ function updateStats() {
 /* ===== THEME ===== */
 function toggleTheme(){
   var light=document.body.classList.toggle('light');
-  document.getElementById('themeBtn').textContent=light?'Light':'Dark';
+  document.getElementById('mThemeBtn').textContent=light?'Light':'Dark';
   document.querySelector('meta[name=theme-color]').content=light?'#f5f6fa':'#0c0f1a';
   try{localStorage.setItem('toeic_theme',light?'light':'dark');}catch(e){}
 }
-(function(){try{if(localStorage.getItem('toeic_theme')==='light'){document.body.classList.add('light');document.getElementById('themeBtn').textContent='Light';document.querySelector('meta[name=theme-color]').content='#f5f6fa';}}catch(e){}})();
+(function(){try{if(localStorage.getItem('toeic_theme')==='light'){document.body.classList.add('light');document.getElementById('mThemeBtn').textContent='Light';document.querySelector('meta[name=theme-color]').content='#f5f6fa';}}catch(e){}})();
 
 /* ===== NAV ===== */
 function mNav(pg){
