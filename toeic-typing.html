@@ -592,10 +592,10 @@
     </div>
   </div>
   <div class="category-filters" id="categoryFilters">
-    <button class="active" onclick="filterCategory('all')">전체</button>
-    <button onclick="filterCategory('none')">미학습 <span class="filter-count" id="countNone"></span></button>
-    <button onclick="filterCategory('learned')">학습 완료 <span class="filter-count" id="countLearned"></span></button>
-    <button onclick="filterCategory('confused')">헷갈리는 단어 <span class="filter-count" id="countConfused"></span></button>
+    <button class="active" onclick="filterCategory('all',event)">전체</button>
+    <button onclick="filterCategory('none',event)">미학습 <span class="filter-count" id="countNone"></span></button>
+    <button onclick="filterCategory('learned',event)">학습 완료 <span class="filter-count" id="countLearned"></span></button>
+    <button onclick="filterCategory('confused',event)">헷갈리는 단어 <span class="filter-count" id="countConfused"></span></button>
     <span style="color:#64748b; font-size:0.75rem; margin-left:8px;">클릭 1회=학습완료 / 2회=헷갈림 / 3회=초기화</span>
   </div>
   <div class="word-list-view active" id="wordListView"></div>
@@ -821,12 +821,12 @@ function cycleWordStatus(word) {
   saveWordStatus();
 }
 
-function filterCategory(cat) {
+function filterCategory(cat, e) {
   currentCategoryFilter = cat;
   currentPage = 1;
   var btns = document.getElementById('categoryFilters').querySelectorAll('button');
   for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
-  event.target.closest('button').classList.add('active');
+  if (e && e.target) e.target.closest('button').classList.add('active');
   renderWordList();
 }
 
@@ -961,7 +961,9 @@ function renderPagination(totalPages) {
 }
 
 function goPage(p) {
-  const totalPages = Math.ceil(getDisplayWords().length / PAGE_SIZE);
+  var dw = getDisplayWords();
+  if (currentCategoryFilter !== 'all') dw = dw.filter(function(w) { return getWordStatus(w.word) === currentCategoryFilter; });
+  var totalPages = Math.ceil(dw.length / PAGE_SIZE);
   if (p < 1 || p > totalPages) return;
   currentPage = p;
   renderWordList();
@@ -1298,7 +1300,8 @@ function startTest(customWords) {
       '</div>';
     return;
   }
-  var countVal = document.getElementById('testQuestionCount').value;
+  var countEl = document.getElementById('testQuestionCount');
+  var countVal = countEl ? countEl.value : 'all';
   var count = countVal === 'all' ? pool.length : parseInt(countVal);
   count = Math.min(count, pool.length);
 
@@ -1678,11 +1681,13 @@ function closeDict() {
 
 /* ===== TTS ===== */
 function speak(word) {
-  if (!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  var u = new SpeechSynthesisUtterance(word);
-  u.lang = 'en-US'; u.rate = 0.9;
-  window.speechSynthesis.speak(u);
+  try {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(word);
+    u.lang = 'en-US'; u.rate = 0.9;
+    window.speechSynthesis.speak(u);
+  } catch(e) {}
 }
 
 function loadCustomWords() {

@@ -678,7 +678,8 @@ function mStartTest(custom){
   var cat=document.getElementById('mTestCat').value;
   var pool=custom||(cat==='all'?mFiltered:mFiltered.filter(function(w){return getWs(w.word)===cat;}));
   if(pool.length===0){document.getElementById('testSetupM').innerHTML='<div class="empty-msg"><div class="em-icon">!</div><div class="em-text">단어가 없습니다</div><div class="em-sub">다른 카테고리를 선택해주세요</div></div>';return;}
-  var cv=document.getElementById('mTestCount').value;
+  var cvEl=document.getElementById('mTestCount');
+  var cv=cvEl?cvEl.value:'all';
   var cnt=cv==='all'?pool.length:Math.min(+cv,pool.length);
   tQs=shuffle(pool).slice(0,cnt);tIdx=0;tResults=[];tStart=Date.now();tAnswered=false;tSynRetry=false;
   document.getElementById('testSetupM').classList.add('hidden');
@@ -842,7 +843,7 @@ function openDict(word){
 function closeDict(){document.getElementById('dictOverlayM').style.display='none';}
 
 /* ===== TTS ===== */
-function speak(word){if(!window.speechSynthesis)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(word);u.lang='en-US';u.rate=0.9;window.speechSynthesis.speak(u);}
+function speak(word){try{if(!window.speechSynthesis)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(word);u.lang='en-US';u.rate=0.9;window.speechSynthesis.speak(u);}catch(e){}}
 
 /* ===== ADD WORD ===== */
 function mOpenAdd(){
