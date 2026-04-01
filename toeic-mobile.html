@@ -116,9 +116,19 @@
   .wcard {
     background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r);
     padding: 16px; margin-bottom: 8px; position: relative;
-    transition: all 0.15s; cursor: pointer; -webkit-user-select: none; user-select: none;
+    -webkit-user-select: none; user-select: none;
+    transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+    overflow: hidden; touch-action: pan-y;
   }
-  .wcard:active { transform: scale(0.98); }
+  .wcard.swiping { transition: none; }
+  .wcard .swipe-hint {
+    position: absolute; top: 0; bottom: 0; display: flex; align-items: center;
+    font-size: 0.75rem; font-weight: 700; opacity: 0; transition: opacity 0.1s;
+    pointer-events: none; padding: 0 16px;
+  }
+  .wcard .swipe-hint.left { right: 12px; color: var(--green); }
+  .wcard .swipe-hint.right { left: 12px; color: var(--amber); }
+  .wcard .swipe-hint.reset { color: var(--t3); }
   .wcard .w-eng { color: var(--acc); font-weight: 600; font-size: 1.1rem; margin-bottom: 4px; }
   .wcard .w-kor { color: var(--t2); font-size: 0.88rem; line-height: 1.5; }
   .wcard .w-ipa { color: var(--t3); font-size: 0.75rem; font-style: italic; margin-bottom: 2px; font-family: 'Noto Sans', 'Lucida Sans Unicode', 'Arial Unicode MS', sans-serif; }
@@ -539,7 +549,7 @@ function mRenderFilters(){
   var cats=[['all','전체',words.length],['none','미학습',cn],['learned','학습완료',cl],['confused','헷갈림',cc]];
   var h='';
   cats.forEach(function(c){h+='<button class="filter-btn'+(mCatFilter===c[0]?' active':'')+'" onclick="mSetCat(this,&apos;'+c[0]+'&apos;)">'+c[1]+' <span style="color:var(--t3);font-size:0.7rem;">('+c[2]+')</span></button>';});
-  h+='<span style="color:var(--t3);font-size:0.68rem;white-space:nowrap;">1tap=완료 2tap=헷갈림 3tap=초기화</span>';
+  h+='<span style="color:var(--t3);font-size:0.68rem;white-space:nowrap;">← 학습완료 | 헷갈림 →</span>';
   document.getElementById('mFilters').innerHTML=h;
 }
 function mSetCat(el,cat){mCatFilter=cat;mPage=1;mRenderList();}
@@ -554,7 +564,10 @@ function mRenderList(){
     var badge='';
     if(st==='learned') badge='<span class="w-badge">완료</span>';
     else if(st==='confused') badge='<span class="w-badge">헷갈림</span>';
-    h+='<div class="wcard'+sc+'" data-w="'+w.word+'">'+badge+'<span class="w-num">'+gi+'</span><div class="w-eng">'+w.word+' <button class="spk-btn" onclick="event.stopPropagation();speak(&apos;'+w.word+'&apos;)">&#9654;</button> <button class="spk-btn" onclick="event.stopPropagation();openDict(&apos;'+w.word+'&apos;)" style="font-size:0.6rem;">&#128214;</button></div><div class="w-kor">'+w.meaning+'</div></div>';
+    var hintL, hintR;
+    if(st==='none') { hintL='학습완료'; hintR='헷갈림'; }
+    else { hintL='초기화'; hintR='초기화'; }
+    h+='<div class="wcard'+sc+'" data-w="'+w.word+'" data-st="'+st+'"><span class="swipe-hint left'+(st!=='none'?' reset':'')+'">'+hintL+'</span><span class="swipe-hint right'+(st!=='none'?' reset':'')+'">'+hintR+'</span>'+badge+'<span class="w-num">'+gi+'</span><div class="w-eng">'+w.word+' <button class="spk-btn" onclick="event.stopPropagation();speak(&apos;'+w.word+'&apos;)">&#9654;</button> <button class="spk-btn" onclick="event.stopPropagation();openDict(&apos;'+w.word+'&apos;)" style="font-size:0.6rem;">&#128214;</button></div><div class="w-kor">'+w.meaning+'</div></div>';
   });
   document.getElementById('mWordList').innerHTML=h;
   mRenderFilters();
@@ -570,10 +583,92 @@ function mRenderList(){
   document.getElementById('mPager').innerHTML=ph;
 }
 function mGoPage(p){var tp=Math.ceil(getDisplayW().length/PS)||1;if(p<1||p>tp)return;mPage=p;mRenderList();window.scrollTo({top:0,behavior:'smooth'});}
-document.getElementById('mWordList').addEventListener('click',function(e){
-  var card=e.target.closest('.wcard');if(!card)return;
-  cycleWs(card.getAttribute('data-w')); mRenderList();
-});
+/* ===== SWIPE HANDLER ===== */
+(function(){
+  var THRESHOLD = 80; // px to confirm swipe
+  var MAX_DRAG = 150; // px for full color intensity
+  var startX = 0, startY = 0, dragging = false, activeCard = null, locked = false;
+
+  function lerp(a, b, t) { return a + (b - a) * Math.min(Math.max(t, 0), 1); }
+
+  function getSwipeColors(card, dx) {
+    var st = card.getAttribute('data-st');
+    var ratio = Math.min(Math.abs(dx) / MAX_DRAG, 1);
+    if (st === 'none') {
+      if (dx < 0) return { bg: 'rgba(74,222,128,' + (ratio * 0.18) + ')', border: 'rgba(74,222,128,' + (ratio * 0.5) + ')' };
+      else return { bg: 'rgba(251,191,36,' + (ratio * 0.18) + ')', border: 'rgba(251,191,36,' + (ratio * 0.5) + ')' };
+    } else {
+      return { bg: 'rgba(140,140,160,' + (ratio * 0.12) + ')', border: 'rgba(140,140,160,' + (ratio * 0.4) + ')' };
+    }
+  }
+
+  var wl = document.getElementById('mWordList');
+
+  wl.addEventListener('touchstart', function(e) {
+    var card = e.target.closest('.wcard');
+    if (!card || e.target.closest('.spk-btn')) return;
+    activeCard = card;
+    var touch = e.touches[0];
+    startX = touch.clientX; startY = touch.clientY;
+    dragging = false; locked = false;
+  }, { passive: true });
+
+  wl.addEventListener('touchmove', function(e) {
+    if (!activeCard) return;
+    var touch = e.touches[0];
+    var dx = touch.clientX - startX;
+    var dy = touch.clientY - startY;
+
+    if (!locked) {
+      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) { activeCard = null; return; }
+      if (Math.abs(dx) > 10) { locked = true; dragging = true; activeCard.classList.add('swiping'); }
+      else return;
+    }
+
+    e.preventDefault();
+    var colors = getSwipeColors(activeCard, dx);
+    activeCard.style.transform = 'translateX(' + dx + 'px)';
+    activeCard.style.background = colors.bg;
+    activeCard.style.borderColor = colors.border;
+
+    // Show hint text
+    var ratio = Math.min(Math.abs(dx) / THRESHOLD, 1);
+    var hintL = activeCard.querySelector('.swipe-hint.left');
+    var hintR = activeCard.querySelector('.swipe-hint.right');
+    if (dx < 0) { hintL.style.opacity = ratio; hintR.style.opacity = 0; }
+    else { hintR.style.opacity = ratio; hintL.style.opacity = 0; }
+  }, { passive: false });
+
+  wl.addEventListener('touchend', function(e) {
+    if (!activeCard || !dragging) { activeCard = null; return; }
+    var card = activeCard;
+    activeCard = null; dragging = false;
+
+    var dx = e.changedTouches[0].clientX - startX;
+    var word = card.getAttribute('data-w');
+    var st = card.getAttribute('data-st');
+    var confirmed = Math.abs(dx) >= THRESHOLD;
+
+    card.classList.remove('swiping');
+    card.style.transform = '';
+    card.style.background = '';
+    card.style.borderColor = '';
+    var hintL = card.querySelector('.swipe-hint.left');
+    var hintR = card.querySelector('.swipe-hint.right');
+    if (hintL) hintL.style.opacity = 0;
+    if (hintR) hintR.style.opacity = 0;
+
+    if (confirmed) {
+      if (st === 'none') {
+        if (dx < 0) ws[word] = 'learned';
+        else ws[word] = 'confused';
+      } else {
+        delete ws[word];
+      }
+      saveWs(); updateStats(); mRenderList();
+    }
+  }, { passive: true });
+})();
 
 /* ===== LEARNING ===== */
 var lWords=[],lIdx=0,lRep=0,lTotal=0,lCorrect=0,lStart=null;
