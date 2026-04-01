@@ -146,6 +146,7 @@
     width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 0.65rem;
     display: inline-flex; align-items: center; justify-content: center;
     vertical-align: middle; margin-left: 6px; padding: 0;
+    touch-action: auto; position: relative; z-index: 3;
   }
   .wcard .w-num { color: var(--t3); font-size: 0.7rem; position: absolute; top: 12px; right: 40px; }
   .bm-btn {
@@ -638,7 +639,10 @@ function mGoPage(p){var tp=Math.ceil(getDisplayW().length/PS)||1;if(p<1||p>tp)re
 
   wl.addEventListener('touchstart', function(e) {
     var card = e.target.closest('.wcard');
-    if (!card || e.target.closest('.spk-btn') || e.target.closest('.bm-btn')) return;
+    // 버튼 영역 터치 시 스와이프 완전 무시 → click 이벤트가 정상 발생하도록
+    if (!card || e.target.closest('.spk-btn') || e.target.closest('.bm-btn')) {
+      activeCard = null; return;
+    }
     activeCard = card;
     var touch = e.touches[0];
     startX = touch.clientX; startY = touch.clientY;
@@ -647,6 +651,8 @@ function mGoPage(p){var tp=Math.ceil(getDisplayW().length/PS)||1;if(p<1||p>tp)re
 
   wl.addEventListener('touchmove', function(e) {
     if (!activeCard) return;
+    // 버튼 위에서 움직이는 경우도 무시
+    if (e.target.closest('.spk-btn') || e.target.closest('.bm-btn')) { activeCard = null; return; }
     var touch = e.touches[0];
     var dx = touch.clientX - startX;
     var dy = touch.clientY - startY;
@@ -1038,31 +1044,24 @@ function speak(word,btn){
     var ss=window.speechSynthesis;
     if(!ss){_resetBtn(btn);return;}
 
-    // iOS: cancel 직후 speak하면 무시되는 버그 → 딜레이 삽입
     ss.cancel();
     if(btn){btn.innerHTML='&#9724;';btn.style.fontSize='0.55rem';}
 
-    setTimeout(function(){
-      try{
-        var u=new SpeechSynthesisUtterance(word);
-        u.lang='en-US';u.rate=0.9;u.volume=1;
-        // 영어 음성 선택 (있으면)
-        if(_voices.length){
-          for(var i=0;i<_voices.length;i++){
-            if(_voices[i].lang&&_voices[i].lang.indexOf('en')===0){u.voice=_voices[i];break;}
-          }
-        }
-        u.onend=function(){_resetBtn(btn);};
-        u.onerror=function(){_resetBtn(btn);};
-        ss.speak(u);
-        // iOS: 일정 시간 후에도 speaking이 안 되면 resume 시도
-        setTimeout(function(){
-          if(ss.paused){ss.resume();}
-          // 안전장치: 5초 후에도 버튼이 안 돌아오면 강제 복원
-          setTimeout(function(){_resetBtn(btn);},5000);
-        },200);
-      }catch(e2){_resetBtn(btn);}
-    },50);
+    // iOS: speak()는 반드시 사용자 제스처 컨텍스트 안에서 직접 호출해야 함
+    // setTimeout 안에 넣으면 iOS가 차단하므로 동기적으로 호출
+    var u=new SpeechSynthesisUtterance(word);
+    u.lang='en-US';u.rate=0.9;u.volume=1;
+    if(_voices.length){
+      for(var i=0;i<_voices.length;i++){
+        if(_voices[i].lang&&_voices[i].lang.indexOf('en')===0){u.voice=_voices[i];break;}
+      }
+    }
+    u.onend=function(){_resetBtn(btn);};
+    u.onerror=function(){_resetBtn(btn);};
+    ss.speak(u);
+    // iOS resume 워크어라운드 + 안전장치
+    setTimeout(function(){if(ss.paused)ss.resume();},100);
+    setTimeout(function(){_resetBtn(btn);},5000);
   }catch(e){_resetBtn(btn);}
 }
 

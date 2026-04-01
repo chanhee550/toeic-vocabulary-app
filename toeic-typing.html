@@ -1816,24 +1816,18 @@ function speak(word, btn) {
     if (!ss) { _resetBtn(btn); return; }
     ss.cancel();
     if (btn) { btn.innerHTML = '&#9724;'; btn.style.fontSize = '0.6rem'; }
-    setTimeout(function() {
-      try {
-        var u = new SpeechSynthesisUtterance(word);
-        u.lang = 'en-US'; u.rate = 0.9; u.volume = 1;
-        if (_voices.length) {
-          for (var i = 0; i < _voices.length; i++) {
-            if (_voices[i].lang && _voices[i].lang.indexOf('en') === 0) { u.voice = _voices[i]; break; }
-          }
-        }
-        u.onend = function() { _resetBtn(btn); };
-        u.onerror = function() { _resetBtn(btn); };
-        ss.speak(u);
-        setTimeout(function() {
-          if (ss.paused) { ss.resume(); }
-          setTimeout(function() { _resetBtn(btn); }, 5000);
-        }, 200);
-      } catch(e2) { _resetBtn(btn); }
-    }, 50);
+    var u = new SpeechSynthesisUtterance(word);
+    u.lang = 'en-US'; u.rate = 0.9; u.volume = 1;
+    if (_voices.length) {
+      for (var i = 0; i < _voices.length; i++) {
+        if (_voices[i].lang && _voices[i].lang.indexOf('en') === 0) { u.voice = _voices[i]; break; }
+      }
+    }
+    u.onend = function() { _resetBtn(btn); };
+    u.onerror = function() { _resetBtn(btn); };
+    ss.speak(u);
+    setTimeout(function() { if (ss.paused) ss.resume(); }, 100);
+    setTimeout(function() { _resetBtn(btn); }, 5000);
   } catch(e) { _resetBtn(btn); }
 }
 
