@@ -1029,16 +1029,26 @@ function closeDict(){document.getElementById('dictOverlayM').style.display='none
 /* ===== TTS ===== */
 function speak(word,btn){
   try{
-    if(!window.speechSynthesis)return;
-    window.speechSynthesis.cancel();
+    var ss=window.speechSynthesis;
+    if(!ss)return;
+    ss.cancel();
+    // iOS fix: resume suspended audio context
+    if(ss.paused)ss.resume();
     var u=new SpeechSynthesisUtterance(word);
     u.lang='en-US';u.rate=0.9;
+    // Try to find English voice
+    var voices=ss.getVoices();
+    for(var i=0;i<voices.length;i++){if(voices[i].lang.startsWith('en')){u.voice=voices[i];break;}}
     if(btn){btn.innerHTML='&#9646;&#9646;';btn.style.fontSize='0.5rem';}
     u.onend=function(){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}};
     u.onerror=function(){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}};
-    window.speechSynthesis.speak(u);
+    ss.speak(u);
+    // iOS workaround: sometimes speak doesn't fire without a tiny delay
+    setTimeout(function(){if(ss.paused)ss.resume();},100);
   }catch(e){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}}
 }
+// Preload voices (needed for some browsers)
+if(window.speechSynthesis){window.speechSynthesis.getVoices();window.speechSynthesis.onvoiceschanged=function(){window.speechSynthesis.getVoices();};}
 
 /* ===== ADD WORD ===== */
 function mOpenAdd(){
