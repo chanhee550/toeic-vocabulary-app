@@ -1039,7 +1039,7 @@ function speak(word,btn){
     // Try to find English voice
     var voices=ss.getVoices();
     for(var i=0;i<voices.length;i++){if(voices[i].lang.startsWith('en')){u.voice=voices[i];break;}}
-    if(btn){btn.innerHTML='&#9646;&#9646;';btn.style.fontSize='0.5rem';}
+    if(btn){btn.innerHTML='&#9724;';btn.style.fontSize='0.55rem';}
     u.onend=function(){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}};
     u.onerror=function(){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}};
     ss.speak(u);
