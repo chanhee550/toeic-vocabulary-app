@@ -109,9 +109,16 @@
   }
   .filter-btn.active { background: var(--acc); color: white; }
   .swipe-guide {
-    text-align: left; padding: 6px 0 10px; font-size: 0.75rem;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0 10px; font-size: 0.75rem;
     font-weight: 500; letter-spacing: 0.3px;
     font-family: 'Inter', -apple-system, sans-serif;
+  }
+  .swipe-guide .add-btn {
+    background: var(--bg-el); border: none; color: var(--acc);
+    width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+    font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
   }
   .search-input {
     width: 100%; padding: 8px 12px; background: var(--bg-card);
@@ -137,7 +144,7 @@
   .wcard .swipe-hint.left { right: 12px; color: var(--amber); }
   .wcard .swipe-hint.right { left: 12px; color: var(--green); }
   .wcard .swipe-hint.reset { color: var(--t3); }
-  .wcard .w-eng { color: var(--acc); font-weight: 600; font-size: 1.1rem; margin-bottom: 4px; }
+  .wcard .w-eng { color: var(--acc); font-weight: 600; font-size: 1.2rem; margin-bottom: 4px; }
   .wcard .w-kor { color: var(--t2); font-size: 0.82rem; line-height: 1.5; }
   .wcard .w-ipa { color: var(--t3); font-size: 0.75rem; font-style: italic; margin-bottom: 2px; font-family: 'Noto Sans', 'Lucida Sans Unicode', 'Arial Unicode MS', sans-serif; }
   .spk-btn {
@@ -342,7 +349,6 @@
 <div class="topbar">
   <h1 onclick="mGoHome()"><span>TOEIC</span> 단어장</h1>
   <div class="topbar-right">
-    <button class="topbar-btn" onclick="mOpenAdd()">+ 추가</button>
     <button class="topbar-btn" id="mThemeBtn" onclick="toggleTheme()">Dark</button>
   </div>
 </div>
@@ -579,7 +585,7 @@ function mRenderFilters(){
   var h='';
   cats.forEach(function(c){h+='<button class="filter-btn'+(mCatFilter===c[0]?' active':'')+'" onclick="mSetCat(this,&apos;'+c[0]+'&apos;)">'+c[1]+' <span style="color:var(--t3);font-size:0.7rem;">('+c[2]+')</span></button>';});
   document.getElementById('mFilters').innerHTML=h;
-  document.getElementById('mSwipeGuide').innerHTML='<span style="color:var(--amber);">← 헷갈림</span>&nbsp;&nbsp;·&nbsp;&nbsp;<span style="color:var(--green);">학습완료 →</span>';
+  document.getElementById('mSwipeGuide').innerHTML='<span><span style="color:var(--amber);">← 헷갈림</span>&nbsp;&nbsp;·&nbsp;&nbsp;<span style="color:var(--green);">학습완료 →</span></span><button class="add-btn" onclick="mOpenAdd()">+</button>';
 }
 function mSetCat(el,cat){mCatFilter=cat;mPage=1;mRenderList();}
 function mRenderList(){
@@ -1036,7 +1042,7 @@ function speak(word,btn){
     window.speechSynthesis.cancel();
     var u=new SpeechSynthesisUtterance(word);
     u.lang='en-US';u.rate=0.9;
-    if(btn){btn.innerHTML='&#9724;';btn.style.fontSize='0.85rem';}
+    if(btn){btn.innerHTML='&#9724;';btn.style.fontSize='1.1rem';}
     u.onend=function(){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}};
     u.onerror=function(){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}};
     window.speechSynthesis.speak(u);
