@@ -1804,30 +1804,29 @@ function closeDict() {
 }
 
 /* ===== TTS ===== */
-var _voices = [];
-function _loadVoices() { if (window.speechSynthesis) { _voices = window.speechSynthesis.getVoices(); } }
-if (window.speechSynthesis) { _loadVoices(); window.speechSynthesis.onvoiceschanged = _loadVoices; }
-
+var _ttsAudio = null;
 function _resetBtn(btn) { if (btn) { btn.innerHTML = '&#9654;'; btn.style.fontSize = ''; } }
 
 function speak(word, btn) {
   try {
-    var ss = window.speechSynthesis;
-    if (!ss) { _resetBtn(btn); return; }
-    ss.cancel();
+    if (_ttsAudio) { _ttsAudio.pause(); _ttsAudio = null; }
     if (btn) { btn.innerHTML = '&#9724;'; btn.style.fontSize = '0.6rem'; }
-    var u = new SpeechSynthesisUtterance(word);
-    u.lang = 'en-US'; u.rate = 0.9; u.volume = 1;
-    if (_voices.length) {
-      for (var i = 0; i < _voices.length; i++) {
-        if (_voices[i].lang && _voices[i].lang.indexOf('en') === 0) { u.voice = _voices[i]; break; }
-      }
-    }
-    u.onend = function() { _resetBtn(btn); };
-    u.onerror = function() { _resetBtn(btn); };
-    ss.speak(u);
-    setTimeout(function() { if (ss.paused) ss.resume(); }, 100);
-    setTimeout(function() { _resetBtn(btn); }, 5000);
+
+    var url = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=' + encodeURIComponent(word);
+    _ttsAudio = new Audio(url);
+    _ttsAudio.onended = function() { _resetBtn(btn); _ttsAudio = null; };
+    _ttsAudio.onerror = function() {
+      _resetBtn(btn); _ttsAudio = null;
+      try {
+        var ss = window.speechSynthesis;
+        if (!ss) return;
+        ss.cancel();
+        var u = new SpeechSynthesisUtterance(word);
+        u.lang = 'en-US'; u.rate = 0.9;
+        ss.speak(u);
+      } catch(e2) {}
+    };
+    _ttsAudio.play();
   } catch(e) { _resetBtn(btn); }
 }
 
