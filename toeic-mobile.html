@@ -132,8 +132,8 @@
     font-size: 0.75rem; font-weight: 700; opacity: 0; transition: opacity 0.1s;
     pointer-events: none; padding: 0 16px;
   }
-  .wcard .swipe-hint.left { right: 12px; color: var(--green); }
-  .wcard .swipe-hint.right { left: 12px; color: var(--amber); }
+  .wcard .swipe-hint.left { right: 12px; color: var(--amber); }
+  .wcard .swipe-hint.right { left: 12px; color: var(--green); }
   .wcard .swipe-hint.reset { color: var(--t3); }
   .wcard .w-eng { color: var(--acc); font-weight: 600; font-size: 1.1rem; margin-bottom: 4px; }
   .wcard .w-kor { color: var(--t2); font-size: 0.88rem; line-height: 1.5; }
@@ -571,7 +571,7 @@ function mRenderFilters(){
   var h='';
   cats.forEach(function(c){h+='<button class="filter-btn'+(mCatFilter===c[0]?' active':'')+'" onclick="mSetCat(this,&apos;'+c[0]+'&apos;)">'+c[1]+' <span style="color:var(--t3);font-size:0.7rem;">('+c[2]+')</span></button>';});
   document.getElementById('mFilters').innerHTML=h;
-  document.getElementById('mSwipeGuide').innerHTML='<span style="color:var(--green);">← 학습완료</span>&nbsp;&nbsp;·&nbsp;&nbsp;<span style="color:var(--amber);">헷갈림 →</span>';
+  document.getElementById('mSwipeGuide').innerHTML='<span style="color:var(--amber);">← 헷갈림</span>&nbsp;&nbsp;·&nbsp;&nbsp;<span style="color:var(--green);">학습완료 →</span>';
 }
 function mSetCat(el,cat){mCatFilter=cat;mPage=1;mRenderList();}
 function mRenderList(){
@@ -586,7 +586,7 @@ function mRenderList(){
     if(st==='learned') badge='<span class="w-badge">완료</span>';
     else if(st==='confused') badge='<span class="w-badge">헷갈림</span>';
     var hintL, hintR;
-    if(st==='none') { hintL='학습완료'; hintR='헷갈림'; }
+    if(st==='none') { hintL='헷갈림'; hintR='학습완료'; }
     else { hintL='초기화'; hintR='초기화'; }
     var bmAct=isBm(w.word)?' active':'';
     h+='<div class="wcard'+sc+'" data-w="'+w.word+'" data-st="'+st+'"><span class="swipe-hint left'+(st!=='none'?' reset':'')+'">'+hintL+'</span><span class="swipe-hint right'+(st!=='none'?' reset':'')+'">'+hintR+'</span>'+badge+'<button class="bm-btn'+bmAct+'" onclick="event.stopPropagation();toggleBm(&apos;'+w.word+'&apos;)">'+(isBm(w.word)?'&#9733;':'&#9734;')+'</button><span class="w-num">'+gi+'</span><div class="w-eng">'+w.word+' <button class="spk-btn" onclick="event.stopPropagation();speak(&apos;'+w.word+'&apos;)">&#9654;</button> <button class="spk-btn" onclick="event.stopPropagation();openDict(&apos;'+w.word+'&apos;)" style="font-size:0.6rem;">&#128214;</button></div><div class="w-kor">'+w.meaning+'</div></div>';
@@ -617,8 +617,8 @@ function mGoPage(p){var tp=Math.ceil(getDisplayW().length/PS)||1;if(p<1||p>tp)re
     var st = card.getAttribute('data-st');
     var ratio = Math.min(Math.abs(dx) / MAX_DRAG, 1);
     if (st === 'none') {
-      if (dx < 0) return { bg: 'rgba(74,222,128,' + (ratio * 0.18) + ')', border: 'rgba(74,222,128,' + (ratio * 0.5) + ')' };
-      else return { bg: 'rgba(251,191,36,' + (ratio * 0.18) + ')', border: 'rgba(251,191,36,' + (ratio * 0.5) + ')' };
+      if (dx < 0) return { bg: 'rgba(251,191,36,' + (ratio * 0.18) + ')', border: 'rgba(251,191,36,' + (ratio * 0.5) + ')' };
+      else return { bg: 'rgba(74,222,128,' + (ratio * 0.18) + ')', border: 'rgba(74,222,128,' + (ratio * 0.5) + ')' };
     } else {
       return { bg: 'rgba(140,140,160,' + (ratio * 0.12) + ')', border: 'rgba(140,140,160,' + (ratio * 0.4) + ')' };
     }
@@ -682,8 +682,8 @@ function mGoPage(p){var tp=Math.ceil(getDisplayW().length/PS)||1;if(p<1||p>tp)re
 
     if (confirmed) {
       if (st === 'none') {
-        if (dx < 0) ws[word] = 'learned';
-        else ws[word] = 'confused';
+        if (dx < 0) ws[word] = 'confused';
+        else ws[word] = 'learned';
       } else {
         delete ws[word];
       }
