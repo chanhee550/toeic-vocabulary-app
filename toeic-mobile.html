@@ -182,25 +182,25 @@
     padding: 16px 0;
   }
   .pager button {
-    padding: 10px 16px; background: var(--bg-card); border: 1px solid var(--border);
+    padding: 10px 16px; background: var(--bg-card); border: none;
     border-radius: var(--r-sm); color: var(--t2); font-family: inherit;
-    font-size: 0.85rem; font-weight: 500; cursor: pointer; min-width: 44px;
+    font-size: 0.82rem; font-weight: 500; cursor: pointer; min-width: 44px;
   }
-  .pager button.active { background: var(--acc); color: white; border-color: var(--acc); }
+  .pager button.active { background: var(--acc); color: white; }
   .pager button:disabled { opacity: 0.3; }
   .pager .pg-info { color: var(--t3); font-size: 0.8rem; }
 
   /* ===== LEARNING PAGE ===== */
   .learn-settings {
-    background: var(--bg-card); border: 1px solid var(--border);
+    background: var(--bg-card); border: none;
     border-radius: var(--r); padding: 18px; margin-bottom: 16px;
   }
   .ls-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .ls-row:last-child { margin-bottom: 0; }
-  .ls-row label { color: var(--t2); font-size: 0.85rem; font-weight: 500; }
+  .ls-row label { color: var(--t2); font-size: 0.82rem; font-weight: 500; }
   .ls-row select, .ls-row input {
-    padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border);
-    border-radius: var(--r-sm); color: var(--t1); font-family: inherit; font-size: 0.85rem;
+    padding: 8px 12px; background: var(--bg-input); border: none;
+    border-radius: var(--r-sm); color: var(--t1); font-family: inherit; font-size: 0.82rem;
   }
   .start-btn {
     width: 100%; padding: 16px; background: var(--acc); color: white; border: none;
@@ -228,7 +228,7 @@
   .lc-char {
     width: 34px; height: 42px; display: flex; align-items: center; justify-content: center;
     font-size: 1.15rem; font-weight: 600; border-radius: var(--r-sm);
-    border: 2px solid var(--border); background: var(--bg-card); color: var(--t3);
+    border: none; background: var(--bg-el); color: var(--t3);
     font-family: 'Inter', monospace;
   }
   .lc-char.filled { color: var(--t1); border-color: var(--border-h); }
@@ -237,29 +237,29 @@
   .lc-char.current { border-color: var(--acc); box-shadow: 0 0 10px var(--acc-glow); }
   .lc-input {
     width: 100%; padding: 14px; font-size: 1.4rem; text-align: center;
-    background: var(--bg-input); border: 2px solid var(--border); border-radius: var(--r);
+    background: var(--bg-input); border: none; border-radius: var(--r);
     color: var(--t1); font-family: 'Inter', monospace; letter-spacing: 3px; outline: none;
   }
-  .lc-input:focus { border-color: var(--acc); }
+  .lc-input:focus { box-shadow: 0 0 0 2px var(--acc); }
   .lc-input.correct { border-color: var(--green); background: var(--green-bg); }
   .lc-input.wrong { border-color: var(--red); background: var(--red-bg); }
   .lc-feedback { font-size: 1rem; min-height: 26px; margin: 12px 0; font-weight: 500; }
   .lc-btns { display: flex; gap: 8px; margin-top: 12px; }
   .lc-btns button {
-    flex: 1; padding: 12px; border: 1px solid var(--border); background: var(--bg-el);
+    flex: 1; padding: 12px; border: none; background: var(--bg-el);
     color: var(--t2); border-radius: var(--r-sm); cursor: pointer; font-family: inherit;
-    font-size: 0.88rem; font-weight: 500;
+    font-size: 0.85rem; font-weight: 500;
   }
-  .lc-btns .primary { background: var(--acc); color: white; border-color: var(--acc); }
+  .lc-btns .primary { background: var(--acc); color: white; }
 
   /* ===== TEST PAGE ===== */
   .test-type-card {
-    background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--r);
+    background: var(--bg-card); border: none; border-radius: var(--r);
     padding: 22px 18px; margin-bottom: 10px; text-align: center; cursor: pointer;
     transition: all 0.2s;
   }
   .test-type-card:active { transform: scale(0.98); }
-  .test-type-card.selected { border-color: var(--acc); background: var(--acc-soft); }
+  .test-type-card.selected { background: var(--acc-soft); box-shadow: 0 0 0 2px var(--acc); }
   .test-type-card .tt-icon { font-size: 1.4rem; font-weight: 700; color: var(--acc); margin-bottom: 8px; }
   .test-type-card .tt-title { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
   .test-type-card .tt-desc { font-size: 0.8rem; color: var(--t2); }
@@ -268,10 +268,10 @@
   .tq-text { font-size: 1.6rem; font-weight: 700; color: var(--purple); line-height: 1.4; margin-bottom: 24px; min-height: 44px; }
   .tq-input {
     width: 100%; padding: 14px; font-size: 1.2rem; text-align: center;
-    background: var(--bg-input); border: 2px solid var(--border); border-radius: var(--r);
+    background: var(--bg-input); border: none; border-radius: var(--r);
     color: var(--t1); font-family: 'Inter', monospace; outline: none;
   }
-  .tq-input:focus { border-color: var(--acc); }
+  .tq-input:focus { box-shadow: 0 0 0 2px var(--acc); }
   .tq-input.correct { border-color: var(--green); background: var(--green-bg); }
   .tq-input.wrong { border-color: var(--red); background: var(--red-bg); }
   .tq-reveal { margin-top: 14px; font-size: 0.95rem; min-height: 24px; }
@@ -284,9 +284,9 @@
 
   .choice-grid { display: flex; flex-direction: column; gap: 10px; }
   .ch-btn {
-    padding: 16px; background: var(--bg-card); border: 2px solid var(--border);
+    padding: 16px; background: var(--bg-card); border: none;
     border-radius: var(--r); color: var(--t1); cursor: pointer; text-align: left;
-    font-size: 0.92rem; line-height: 1.5; font-family: inherit; transition: all 0.15s;
+    font-size: 0.88rem; line-height: 1.5; font-family: inherit; transition: all 0.15s;
   }
   .ch-btn:active { transform: scale(0.98); }
   .ch-btn .ch-num { color: var(--t3); font-size: 0.72rem; font-weight: 600; margin-right: 8px; }
