@@ -52,13 +52,14 @@
   var isMobile = isIOS || isAndroid || /webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua)
     || (navigator.maxTouchPoints > 1 && window.innerWidth < 1024);
 
+  var v = '_v=' + Date.now();
   try {
     if (isIOS) {
-      window.location.replace('toeic-ios.html');
+      window.location.replace('toeic-ios.html?' + v);
     } else if (isMobile) {
-      window.location.replace('toeic-mobile.html');
+      window.location.replace('toeic-mobile.html?' + v);
     } else {
-      window.location.replace('toeic-typing.html');
+      window.location.replace('toeic-typing.html?' + v);
     }
   } catch(e) {
     document.getElementById('manual').style.display = 'block';
