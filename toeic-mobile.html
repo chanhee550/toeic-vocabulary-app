@@ -1027,28 +1027,44 @@ function openDict(word){
 function closeDict(){document.getElementById('dictOverlayM').style.display='none';}
 
 /* ===== TTS ===== */
+var _voices=[];
+function _loadVoices(){if(window.speechSynthesis){_voices=window.speechSynthesis.getVoices();}}
+if(window.speechSynthesis){_loadVoices();window.speechSynthesis.onvoiceschanged=_loadVoices;}
+
+function _resetBtn(btn){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}}
+
 function speak(word,btn){
   try{
     var ss=window.speechSynthesis;
-    if(!ss)return;
+    if(!ss){_resetBtn(btn);return;}
+
+    // iOS: cancel 직후 speak하면 무시되는 버그 → 딜레이 삽입
     ss.cancel();
-    // iOS fix: resume suspended audio context
-    if(ss.paused)ss.resume();
-    var u=new SpeechSynthesisUtterance(word);
-    u.lang='en-US';u.rate=0.9;
-    // Try to find English voice
-    var voices=ss.getVoices();
-    for(var i=0;i<voices.length;i++){if(voices[i].lang.startsWith('en')){u.voice=voices[i];break;}}
     if(btn){btn.innerHTML='&#9724;';btn.style.fontSize='0.55rem';}
-    u.onend=function(){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}};
-    u.onerror=function(){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}};
-    ss.speak(u);
-    // iOS workaround: sometimes speak doesn't fire without a tiny delay
-    setTimeout(function(){if(ss.paused)ss.resume();},100);
-  }catch(e){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}}
+
+    setTimeout(function(){
+      try{
+        var u=new SpeechSynthesisUtterance(word);
+        u.lang='en-US';u.rate=0.9;u.volume=1;
+        // 영어 음성 선택 (있으면)
+        if(_voices.length){
+          for(var i=0;i<_voices.length;i++){
+            if(_voices[i].lang&&_voices[i].lang.indexOf('en')===0){u.voice=_voices[i];break;}
+          }
+        }
+        u.onend=function(){_resetBtn(btn);};
+        u.onerror=function(){_resetBtn(btn);};
+        ss.speak(u);
+        // iOS: 일정 시간 후에도 speaking이 안 되면 resume 시도
+        setTimeout(function(){
+          if(ss.paused){ss.resume();}
+          // 안전장치: 5초 후에도 버튼이 안 돌아오면 강제 복원
+          setTimeout(function(){_resetBtn(btn);},5000);
+        },200);
+      }catch(e2){_resetBtn(btn);}
+    },50);
+  }catch(e){_resetBtn(btn);}
 }
-// Preload voices (needed for some browsers)
-if(window.speechSynthesis){window.speechSynthesis.getVoices();window.speechSynthesis.onvoiceschanged=function(){window.speechSynthesis.getVoices();};}
 
 /* ===== ADD WORD ===== */
 function mOpenAdd(){

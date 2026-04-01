@@ -1804,24 +1804,38 @@ function closeDict() {
 }
 
 /* ===== TTS ===== */
+var _voices = [];
+function _loadVoices() { if (window.speechSynthesis) { _voices = window.speechSynthesis.getVoices(); } }
+if (window.speechSynthesis) { _loadVoices(); window.speechSynthesis.onvoiceschanged = _loadVoices; }
+
+function _resetBtn(btn) { if (btn) { btn.innerHTML = '&#9654;'; btn.style.fontSize = ''; } }
+
 function speak(word, btn) {
   try {
     var ss = window.speechSynthesis;
-    if (!ss) return;
+    if (!ss) { _resetBtn(btn); return; }
     ss.cancel();
-    if (ss.paused) ss.resume();
-    var u = new SpeechSynthesisUtterance(word);
-    u.lang = 'en-US'; u.rate = 0.9;
-    var voices = ss.getVoices();
-    for (var i = 0; i < voices.length; i++) { if (voices[i].lang.startsWith('en')) { u.voice = voices[i]; break; } }
     if (btn) { btn.innerHTML = '&#9724;'; btn.style.fontSize = '0.6rem'; }
-    u.onend = function() { if (btn) { btn.innerHTML = '&#9654;'; btn.style.fontSize = ''; } };
-    u.onerror = function() { if (btn) { btn.innerHTML = '&#9654;'; btn.style.fontSize = ''; } };
-    ss.speak(u);
-    setTimeout(function() { if (ss.paused) ss.resume(); }, 100);
-  } catch(e) { if (btn) { btn.innerHTML = '&#9654;'; btn.style.fontSize = ''; } }
+    setTimeout(function() {
+      try {
+        var u = new SpeechSynthesisUtterance(word);
+        u.lang = 'en-US'; u.rate = 0.9; u.volume = 1;
+        if (_voices.length) {
+          for (var i = 0; i < _voices.length; i++) {
+            if (_voices[i].lang && _voices[i].lang.indexOf('en') === 0) { u.voice = _voices[i]; break; }
+          }
+        }
+        u.onend = function() { _resetBtn(btn); };
+        u.onerror = function() { _resetBtn(btn); };
+        ss.speak(u);
+        setTimeout(function() {
+          if (ss.paused) { ss.resume(); }
+          setTimeout(function() { _resetBtn(btn); }, 5000);
+        }, 200);
+      } catch(e2) { _resetBtn(btn); }
+    }, 50);
+  } catch(e) { _resetBtn(btn); }
 }
-if (window.speechSynthesis) { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = function() { window.speechSynthesis.getVoices(); }; }
 
 function loadCustomWords() {
   try {
