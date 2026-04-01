@@ -143,17 +143,17 @@
   .wcard .w-ipa { color: var(--t3); font-size: 0.75rem; font-style: italic; margin-bottom: 2px; font-family: 'Noto Sans', 'Lucida Sans Unicode', 'Arial Unicode MS', sans-serif; }
   .spk-btn {
     background: var(--acc-soft); border: 1px solid var(--border); color: var(--acc);
-    width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 0.65rem;
+    width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 0.7rem;
     display: inline-flex; align-items: center; justify-content: center;
     vertical-align: middle; margin-left: 6px; padding: 0;
-    touch-action: auto; position: relative; z-index: 3;
+    touch-action: manipulation; position: relative; z-index: 3;
   }
   .wcard .w-num { color: var(--t3); font-size: 0.7rem; position: absolute; top: 12px; right: 40px; }
   .bm-btn {
-    position: absolute; top: 10px; right: 10px; background: none; border: none;
-    font-size: 1.1rem; cursor: pointer; padding: 2px 4px; line-height: 1;
+    position: absolute; top: 6px; right: 6px; background: none; border: none;
+    font-size: 1.2rem; cursor: pointer; padding: 6px 8px; line-height: 1;
     color: var(--t3); transition: color 0.2s, transform 0.2s;
-    z-index: 2;
+    z-index: 3; touch-action: manipulation;
   }
   .bm-btn.active { color: #facc15; transform: scale(1.15); }
   .wcard .w-badge {
@@ -600,7 +600,7 @@ function mRenderList(){
     if(st==='none') { hintL='헷갈림'; hintR='학습완료'; }
     else { hintL='초기화'; hintR='초기화'; }
     var bmAct=isBm(w.word)?' active':'';
-    h+='<div class="wcard'+sc+'" data-w="'+w.word+'" data-st="'+st+'"><span class="swipe-hint left'+(st!=='none'?' reset':'')+'">'+hintL+'</span><span class="swipe-hint right'+(st!=='none'?' reset':'')+'">'+hintR+'</span>'+badge+'<button class="bm-btn'+bmAct+'" onclick="event.stopPropagation();toggleBm(&apos;'+w.word+'&apos;)">'+(isBm(w.word)?'&#9733;':'&#9734;')+'</button><span class="w-num">'+gi+'</span><div class="w-eng">'+w.word+' <button class="spk-btn" onclick="event.stopPropagation();speak(&apos;'+w.word+'&apos;,this)">&#9654;</button> <button class="spk-btn" onclick="event.stopPropagation();openDict(&apos;'+w.word+'&apos;)" style="font-size:0.6rem;">&#128214;</button></div><div class="w-kor">'+w.meaning+'</div></div>';
+    h+='<div class="wcard'+sc+'" data-w="'+w.word+'" data-st="'+st+'"><span class="swipe-hint left'+(st!=='none'?' reset':'')+'">'+hintL+'</span><span class="swipe-hint right'+(st!=='none'?' reset':'')+'">'+hintR+'</span>'+badge+'<button class="bm-btn'+bmAct+'" ontouchend="event.stopPropagation();event.preventDefault();toggleBm(&apos;'+w.word+'&apos;)" onclick="event.stopPropagation();toggleBm(&apos;'+w.word+'&apos;)">'+(isBm(w.word)?'&#9733;':'&#9734;')+'</button><span class="w-num">'+gi+'</span><div class="w-eng">'+w.word+' <button class="spk-btn" ontouchend="event.stopPropagation();event.preventDefault();speak(&apos;'+w.word+'&apos;,this)" onclick="event.stopPropagation();speak(&apos;'+w.word+'&apos;,this)">&#9654;</button> <button class="spk-btn" ontouchend="event.stopPropagation();event.preventDefault();openDict(&apos;'+w.word+'&apos;)" onclick="event.stopPropagation();openDict(&apos;'+w.word+'&apos;)" style="font-size:0.6rem;">&#128214;</button></div><div class="w-kor">'+w.meaning+'</div></div>';
   });
   document.getElementById('mWordList').innerHTML=h;
   mRenderFilters();
