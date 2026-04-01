@@ -1033,33 +1033,17 @@ function openDict(word){
 function closeDict(){document.getElementById('dictOverlayM').style.display='none';}
 
 /* ===== TTS ===== */
-var _ttsAudio=null;
-function _resetBtn(btn){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}}
-
 function speak(word,btn){
   try{
-    // 이전 재생 중지
-    if(_ttsAudio){_ttsAudio.pause();_ttsAudio=null;}
+    if(!window.speechSynthesis)return;
+    window.speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(word);
+    u.lang='en-US';u.rate=0.9;
     if(btn){btn.innerHTML='&#9724;';btn.style.fontSize='0.55rem';}
-
-    // Google Translate TTS (가장 호환성 높음)
-    var url='https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q='+encodeURIComponent(word);
-    _ttsAudio=new Audio(url);
-    _ttsAudio.onended=function(){_resetBtn(btn);_ttsAudio=null;};
-    _ttsAudio.onerror=function(){
-      // fallback: Web Speech API
-      _resetBtn(btn);_ttsAudio=null;
-      try{
-        var ss=window.speechSynthesis;
-        if(!ss)return;
-        ss.cancel();
-        var u=new SpeechSynthesisUtterance(word);
-        u.lang='en-US';u.rate=0.9;
-        ss.speak(u);
-      }catch(e2){}
-    };
-    _ttsAudio.play();
-  }catch(e){_resetBtn(btn);}
+    u.onend=function(){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}};
+    u.onerror=function(){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}};
+    window.speechSynthesis.speak(u);
+  }catch(e){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}}
 }
 
 /* ===== ADD WORD ===== */
