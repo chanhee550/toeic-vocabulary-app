@@ -554,7 +554,7 @@
 <body>
 <div class="header">
   <div style="display:flex; align-items:center; gap:12px;">
-    <h1><span>TOEIC</span> 영단어장</h1>
+    <h1 onclick="goHome()" style="cursor:pointer;"><span>TOEIC</span> 영단어장</h1>
     <button onclick="toggleTheme()" id="themeBtn" style="background:var(--bg-elevated); border:1px solid var(--border); color:var(--text-secondary); padding:6px 12px; border-radius:var(--radius-full); cursor:pointer; font-size:0.8rem; font-family:inherit; transition:all 0.2s; min-width:60px; text-align:center;">Dark</button>
   </div>
   <div class="header-stats">
@@ -972,7 +972,7 @@ function renderWordList() {
       '<button class="bm-btn' + bmAct + '" onclick="event.stopPropagation();toggleBookmark(&apos;' + w.word + '&apos;)">' + bmIcon + '</button>' +
       '<span class="num">' + globalIdx + '</span>' +
       '<span class="eng">' + w.word + '</span>' +
-      '<button class="speak-btn" onclick="event.stopPropagation();speak(&apos;' + w.word + '&apos;)" title="발음 듣기">&#9654;</button>' +
+      '<button class="speak-btn" onclick="event.stopPropagation();speak(&apos;' + w.word + '&apos;,this)" title="발음 듣기">&#9654;</button>' +
       '<button class="speak-btn" onclick="event.stopPropagation();openDict(&apos;' + w.word + '&apos;)" title="사전 보기" style="font-size:0.75rem;">&#128214;</button>' +
       '<span class="kor">' + w.meaning + '</span>' +
     '</div>';
@@ -1023,6 +1023,18 @@ function goPage(p) {
 }
 
 function searchWords() { currentPage = 1; renderWordList(); }
+
+function goHome() {
+  switchMode('list');
+  currentCategoryFilter = 'all';
+  currentPage = 1;
+  document.getElementById('searchBox').value = '';
+  var btns = document.getElementById('categoryFilters').querySelectorAll('button');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  btns[0].classList.add('active');
+  renderWordList();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 
 function switchMode(mode) {
   currentMode = mode;
@@ -1792,14 +1804,17 @@ function closeDict() {
 }
 
 /* ===== TTS ===== */
-function speak(word) {
+function speak(word, btn) {
   try {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     var u = new SpeechSynthesisUtterance(word);
     u.lang = 'en-US'; u.rate = 0.9;
+    if (btn) { btn.innerHTML = '&#9646;&#9646;'; btn.style.fontSize = '0.55rem'; }
+    u.onend = function() { if (btn) { btn.innerHTML = '&#9654;'; btn.style.fontSize = ''; } };
+    u.onerror = function() { if (btn) { btn.innerHTML = '&#9654;'; btn.style.fontSize = ''; } };
     window.speechSynthesis.speak(u);
-  } catch(e) {}
+  } catch(e) { if (btn) { btn.innerHTML = '&#9654;'; btn.style.fontSize = ''; } }
 }
 
 function loadCustomWords() {

@@ -52,7 +52,7 @@
     padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;
     backdrop-filter: blur(12px);
   }
-  .topbar h1 { font-size: 1.15rem; font-weight: 700; }
+  .topbar h1 { font-size: 1.15rem; font-weight: 700; cursor: pointer; }
   .topbar h1 span { color: var(--acc); }
   .topbar-right { display: flex; gap: 8px; align-items: center; }
   .topbar-btn {
@@ -342,7 +342,7 @@
 
 <!-- TOP BAR -->
 <div class="topbar">
-  <h1><span>TOEIC</span> 단어장</h1>
+  <h1 onclick="mGoHome()"><span>TOEIC</span> 단어장</h1>
   <div class="topbar-right">
     <button class="topbar-btn" onclick="mOpenAdd()">+ 추가</button>
     <button class="topbar-btn" id="mThemeBtn" onclick="toggleTheme()">Dark</button>
@@ -535,6 +535,13 @@ function toggleTheme(){
 (function(){try{if(localStorage.getItem('toeic_theme')==='light'){document.body.classList.add('light');document.getElementById('mThemeBtn').textContent='Light';document.querySelector('meta[name=theme-color]').content='#f5f6fa';}}catch(e){}})();
 
 /* ===== NAV ===== */
+function mGoHome(){
+  mNav('list');
+  mCatFilter='all'; mPage=1;
+  document.getElementById('mSearch').value='';
+  mRenderList();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 function mNav(pg){
   ['list','learn','test'].forEach(function(p){
     document.getElementById('pg'+p.charAt(0).toUpperCase()+p.slice(1)).classList.toggle('active',p===pg);
@@ -592,7 +599,7 @@ function mRenderList(){
     if(st==='none') { hintL='헷갈림'; hintR='학습완료'; }
     else { hintL='초기화'; hintR='초기화'; }
     var bmAct=isBm(w.word)?' active':'';
-    h+='<div class="wcard'+sc+'" data-w="'+w.word+'" data-st="'+st+'"><span class="swipe-hint left'+(st!=='none'?' reset':'')+'">'+hintL+'</span><span class="swipe-hint right'+(st!=='none'?' reset':'')+'">'+hintR+'</span>'+badge+'<button class="bm-btn'+bmAct+'" onclick="event.stopPropagation();toggleBm(&apos;'+w.word+'&apos;)">'+(isBm(w.word)?'&#9733;':'&#9734;')+'</button><span class="w-num">'+gi+'</span><div class="w-eng">'+w.word+' <button class="spk-btn" onclick="event.stopPropagation();speak(&apos;'+w.word+'&apos;)">&#9654;</button> <button class="spk-btn" onclick="event.stopPropagation();openDict(&apos;'+w.word+'&apos;)" style="font-size:0.6rem;">&#128214;</button></div><div class="w-kor">'+w.meaning+'</div></div>';
+    h+='<div class="wcard'+sc+'" data-w="'+w.word+'" data-st="'+st+'"><span class="swipe-hint left'+(st!=='none'?' reset':'')+'">'+hintL+'</span><span class="swipe-hint right'+(st!=='none'?' reset':'')+'">'+hintR+'</span>'+badge+'<button class="bm-btn'+bmAct+'" onclick="event.stopPropagation();toggleBm(&apos;'+w.word+'&apos;)">'+(isBm(w.word)?'&#9733;':'&#9734;')+'</button><span class="w-num">'+gi+'</span><div class="w-eng">'+w.word+' <button class="spk-btn" onclick="event.stopPropagation();speak(&apos;'+w.word+'&apos;,this)">&#9654;</button> <button class="spk-btn" onclick="event.stopPropagation();openDict(&apos;'+w.word+'&apos;)" style="font-size:0.6rem;">&#128214;</button></div><div class="w-kor">'+w.meaning+'</div></div>';
   });
   document.getElementById('mWordList').innerHTML=h;
   mRenderFilters();
@@ -1020,7 +1027,18 @@ function openDict(word){
 function closeDict(){document.getElementById('dictOverlayM').style.display='none';}
 
 /* ===== TTS ===== */
-function speak(word){try{if(!window.speechSynthesis)return;window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(word);u.lang='en-US';u.rate=0.9;window.speechSynthesis.speak(u);}catch(e){}}
+function speak(word,btn){
+  try{
+    if(!window.speechSynthesis)return;
+    window.speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(word);
+    u.lang='en-US';u.rate=0.9;
+    if(btn){btn.innerHTML='&#9646;&#9646;';btn.style.fontSize='0.5rem';}
+    u.onend=function(){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}};
+    u.onerror=function(){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}};
+    window.speechSynthesis.speak(u);
+  }catch(e){if(btn){btn.innerHTML='&#9654;';btn.style.fontSize='';}}
+}
 
 /* ===== ADD WORD ===== */
 function mOpenAdd(){
