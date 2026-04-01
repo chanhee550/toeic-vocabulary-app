@@ -144,7 +144,14 @@
     display: inline-flex; align-items: center; justify-content: center;
     vertical-align: middle; margin-left: 6px; padding: 0;
   }
-  .wcard .w-num { color: var(--t3); font-size: 0.7rem; position: absolute; top: 12px; right: 14px; }
+  .wcard .w-num { color: var(--t3); font-size: 0.7rem; position: absolute; top: 12px; right: 40px; }
+  .bm-btn {
+    position: absolute; top: 10px; right: 10px; background: none; border: none;
+    font-size: 1.1rem; cursor: pointer; padding: 2px 4px; line-height: 1;
+    color: var(--t3); transition: color 0.2s, transform 0.2s;
+    z-index: 2;
+  }
+  .bm-btn.active { color: #facc15; transform: scale(1.15); }
   .wcard .w-badge {
     font-size: 0.6rem; font-weight: 600; padding: 2px 8px; border-radius: var(--r-full);
     position: absolute; bottom: 12px; right: 14px;
@@ -494,6 +501,12 @@ var ws = {};
 try { var sv = localStorage.getItem('toeic_word_status'); if(sv) ws = JSON.parse(sv); } catch(e){}
 function saveWs() { try{localStorage.setItem('toeic_word_status',JSON.stringify(ws));}catch(e){} }
 function getWs(w) { return ws[w]||'none'; }
+
+var bm = {};
+try { var bv = localStorage.getItem('toeic_bookmarks'); if(bv) bm = JSON.parse(bv); } catch(e){}
+function saveBm() { try{localStorage.setItem('toeic_bookmarks',JSON.stringify(bm));}catch(e){} }
+function isBm(w) { return !!bm[w]; }
+function toggleBm(w) { if(bm[w]) delete bm[w]; else bm[w]=1; saveBm(); mRenderList(); }
 function cycleWs(w) {
   var c = getWs(w);
   if(c==='none') ws[w]='learned'; else if(c==='learned') ws[w]='confused'; else delete ws[w];
@@ -545,15 +558,16 @@ function mChangeRange(){
 function getDisplayW(){
   var s=document.getElementById('mSearch').value.toLowerCase();
   var base=s?W.filter(function(w){return w.word.toLowerCase().includes(s)||w.meaning.includes(s);}):mFiltered;
+  if(mCatFilter==='bookmark') return base.filter(function(w){return isBm(w.word);});
   if(mCatFilter!=='all') return base.filter(function(w){return getWs(w.word)===mCatFilter;});
   return base;
 }
 function mRenderFilters(){
   var words=mFiltered, s=document.getElementById('mSearch').value.toLowerCase();
   if(s) words=W.filter(function(w){return w.word.toLowerCase().includes(s)||w.meaning.includes(s);});
-  var cn=0,cl=0,cc=0;
-  for(var i=0;i<words.length;i++){var st=getWs(words[i].word);if(st==='learned')cl++;else if(st==='confused')cc++;else cn++;}
-  var cats=[['all','전체',words.length],['none','미학습',cn],['learned','학습완료',cl],['confused','헷갈림',cc]];
+  var cn=0,cl=0,cc=0,cb=0;
+  for(var i=0;i<words.length;i++){var st=getWs(words[i].word);if(st==='learned')cl++;else if(st==='confused')cc++;else cn++;if(isBm(words[i].word))cb++;}
+  var cats=[['all','전체',words.length],['none','미학습',cn],['learned','학습완료',cl],['confused','헷갈림',cc],['bookmark','★ 북마크',cb]];
   var h='';
   cats.forEach(function(c){h+='<button class="filter-btn'+(mCatFilter===c[0]?' active':'')+'" onclick="mSetCat(this,&apos;'+c[0]+'&apos;)">'+c[1]+' <span style="color:var(--t3);font-size:0.7rem;">('+c[2]+')</span></button>';});
   document.getElementById('mFilters').innerHTML=h;
@@ -574,7 +588,8 @@ function mRenderList(){
     var hintL, hintR;
     if(st==='none') { hintL='학습완료'; hintR='헷갈림'; }
     else { hintL='초기화'; hintR='초기화'; }
-    h+='<div class="wcard'+sc+'" data-w="'+w.word+'" data-st="'+st+'"><span class="swipe-hint left'+(st!=='none'?' reset':'')+'">'+hintL+'</span><span class="swipe-hint right'+(st!=='none'?' reset':'')+'">'+hintR+'</span>'+badge+'<span class="w-num">'+gi+'</span><div class="w-eng">'+w.word+' <button class="spk-btn" onclick="event.stopPropagation();speak(&apos;'+w.word+'&apos;)">&#9654;</button> <button class="spk-btn" onclick="event.stopPropagation();openDict(&apos;'+w.word+'&apos;)" style="font-size:0.6rem;">&#128214;</button></div><div class="w-kor">'+w.meaning+'</div></div>';
+    var bmAct=isBm(w.word)?' active':'';
+    h+='<div class="wcard'+sc+'" data-w="'+w.word+'" data-st="'+st+'"><span class="swipe-hint left'+(st!=='none'?' reset':'')+'">'+hintL+'</span><span class="swipe-hint right'+(st!=='none'?' reset':'')+'">'+hintR+'</span>'+badge+'<button class="bm-btn'+bmAct+'" onclick="event.stopPropagation();toggleBm(&apos;'+w.word+'&apos;)">'+(isBm(w.word)?'&#9733;':'&#9734;')+'</button><span class="w-num">'+gi+'</span><div class="w-eng">'+w.word+' <button class="spk-btn" onclick="event.stopPropagation();speak(&apos;'+w.word+'&apos;)">&#9654;</button> <button class="spk-btn" onclick="event.stopPropagation();openDict(&apos;'+w.word+'&apos;)" style="font-size:0.6rem;">&#128214;</button></div><div class="w-kor">'+w.meaning+'</div></div>';
   });
   document.getElementById('mWordList').innerHTML=h;
   mRenderFilters();
@@ -613,7 +628,7 @@ function mGoPage(p){var tp=Math.ceil(getDisplayW().length/PS)||1;if(p<1||p>tp)re
 
   wl.addEventListener('touchstart', function(e) {
     var card = e.target.closest('.wcard');
-    if (!card || e.target.closest('.spk-btn')) return;
+    if (!card || e.target.closest('.spk-btn') || e.target.closest('.bm-btn')) return;
     activeCard = card;
     var touch = e.touches[0];
     startX = touch.clientX; startY = touch.clientY;

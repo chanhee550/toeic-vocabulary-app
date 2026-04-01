@@ -127,8 +127,15 @@
   .speak-btn:hover { background: var(--accent); color: white; }
   .word-card .card-badge {
     font-size: 0.65rem; font-weight: 600; padding: 3px 10px; border-radius: var(--radius-full);
-    position: absolute; top: 10px; right: 12px; letter-spacing: 0.3px;
+    position: absolute; top: 10px; right: 42px; letter-spacing: 0.3px;
   }
+  .bm-btn {
+    position: absolute; top: 8px; right: 12px; background: none; border: none;
+    font-size: 1.15rem; cursor: pointer; padding: 2px 4px; line-height: 1;
+    color: var(--text-dim); transition: color 0.2s, transform 0.2s;
+  }
+  .bm-btn:hover { color: #facc15; }
+  .bm-btn.active { color: #facc15; transform: scale(1.15); }
   .word-card.status-learned {
     border-color: var(--green-border); background: var(--green-bg);
   }
@@ -614,6 +621,7 @@
     <button onclick="filterCategory('none',event)">미학습 <span class="filter-count" id="countNone"></span></button>
     <button onclick="filterCategory('learned',event)">학습 완료 <span class="filter-count" id="countLearned"></span></button>
     <button onclick="filterCategory('confused',event)">헷갈리는 단어 <span class="filter-count" id="countConfused"></span></button>
+    <button onclick="filterCategory('bookmark',event)">★ 북마크 <span class="filter-count" id="countBookmark"></span></button>
   </div>
   <div style="text-align:center; padding:8px 0 12px; font-size:0.82rem; font-weight:500; letter-spacing:0.3px;">
     <span style="color:var(--green);">클릭 1회 = 학습완료</span>&nbsp;&nbsp;·&nbsp;&nbsp;<span style="color:var(--amber);">2회 = 헷갈림</span>&nbsp;&nbsp;·&nbsp;&nbsp;<span style="color:var(--text-dim);">3회 = 초기화</span>
@@ -819,6 +827,12 @@ function saveWordStatus() {
   updateHeaderStats();
 }
 
+var bookmarks = {};
+try { var bsv = localStorage.getItem('toeic_bookmarks'); if(bsv) bookmarks = JSON.parse(bsv); } catch(e) {}
+function saveBookmarks() { try { localStorage.setItem('toeic_bookmarks', JSON.stringify(bookmarks)); } catch(e) {} }
+function isBookmarked(w) { return !!bookmarks[w]; }
+function toggleBookmark(w) { if(bookmarks[w]) delete bookmarks[w]; else bookmarks[w]=1; saveBookmarks(); renderWordList(); }
+
 function updateHeaderStats() {
   var total = ALL_WORDS.length;
   var learned = 0;
@@ -866,16 +880,18 @@ function updateCategoryCounts() {
       return w.word.toLowerCase().includes(search) || w.meaning.includes(search);
     });
   }
-  var cNone = 0, cLearned = 0, cConfused = 0;
+  var cNone = 0, cLearned = 0, cConfused = 0, cBookmark = 0;
   for (var i = 0; i < words.length; i++) {
     var s = getWordStatus(words[i].word);
     if (s === 'learned') cLearned++;
     else if (s === 'confused') cConfused++;
     else cNone++;
+    if (isBookmarked(words[i].word)) cBookmark++;
   }
   document.getElementById('countNone').textContent = '(' + cNone + ')';
   document.getElementById('countLearned').textContent = '(' + cLearned + ')';
   document.getElementById('countConfused').textContent = '(' + cConfused + ')';
+  document.getElementById('countBookmark').textContent = '(' + cBookmark + ')';
 }
 let typingWords = [];
 let typingIndex = 0;
@@ -925,7 +941,9 @@ function renderWordList() {
   var allDisplayWords = getDisplayWords();
 
   // Apply category filter
-  if (currentCategoryFilter !== 'all') {
+  if (currentCategoryFilter === 'bookmark') {
+    allDisplayWords = allDisplayWords.filter(function(w) { return isBookmarked(w.word); });
+  } else if (currentCategoryFilter !== 'all') {
     allDisplayWords = allDisplayWords.filter(function(w) {
       return getWordStatus(w.word) === currentCategoryFilter;
     });
@@ -944,8 +962,11 @@ function renderWordList() {
     var badge = '';
     if (status === 'learned') badge = '<span class="card-badge">학습 완료</span>';
     else if (status === 'confused') badge = '<span class="card-badge">헷갈림</span>';
+    var bmAct = isBookmarked(w.word) ? ' active' : '';
+    var bmIcon = isBookmarked(w.word) ? '&#9733;' : '&#9734;';
     return '<div class="word-card' + statusClass + '" data-word="' + w.word + '">' +
       badge +
+      '<button class="bm-btn' + bmAct + '" onclick="event.stopPropagation();toggleBookmark(&apos;' + w.word + '&apos;)">' + bmIcon + '</button>' +
       '<span class="num">' + globalIdx + '</span>' +
       '<span class="eng">' + w.word + '</span>' +
       '<button class="speak-btn" onclick="event.stopPropagation();speak(&apos;' + w.word + '&apos;)" title="발음 듣기">&#9654;</button>' +
