@@ -14,8 +14,9 @@
   .loader h2 { font-size: 1.3rem; margin-bottom: 12px; }
   .loader p { color: #8b92ab; font-size: 0.9rem; margin-bottom: 20px; }
   .loader a {
-    display: inline-block; padding: 10px 24px; background: #6c8cff; color: white;
-    border-radius: 8px; text-decoration: none; font-size: 0.9rem; margin: 6px;
+    display: inline-block; padding: 12px 28px; background: #6c8cff; color: white;
+    border-radius: 8px; text-decoration: none; font-size: 0.95rem; margin: 6px;
+    font-weight: 500;
   }
   .loader a.secondary { background: #1c2137; border: 1px solid #2a3050; color: #8b92ab; }
   .spinner {
@@ -31,23 +32,30 @@
   <h2>TOEIC 단어장</h2>
   <p>기기를 감지하는 중...</p>
   <noscript>
-    <p>JavaScript가 필요합니다. 직접 선택해 주세요:</p>
+    <p style="color:#f87171;">JavaScript가 필요합니다. 직접 선택해 주세요:</p>
     <a href="toeic-typing.html">PC 버전</a>
-    <a href="toeic-mobile.html">모바일 버전</a>
+    <a href="toeic-ios.html">iPhone 버전</a>
+    <a href="toeic-mobile.html">Android 버전</a>
   </noscript>
   <div id="manual" style="display:none;">
-    <p>자동 감지에 실패했습니다. 직접 선택해 주세요:</p>
+    <p>직접 선택해 주세요:</p>
     <a href="toeic-typing.html">PC 버전</a>
-    <a href="toeic-mobile.html">모바일 버전</a>
+    <a href="toeic-ios.html">iPhone 버전</a>
+    <a href="toeic-mobile.html">Android 버전</a>
   </div>
 </div>
 <script>
 (function() {
-  var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  var ua = navigator.userAgent;
+  var isIOS = /iPhone|iPad|iPod/i.test(ua);
+  var isAndroid = /Android/i.test(ua);
+  var isMobile = isIOS || isAndroid || /webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua)
     || (navigator.maxTouchPoints > 1 && window.innerWidth < 1024);
 
   try {
-    if (isMobile) {
+    if (isIOS) {
+      window.location.replace('toeic-ios.html');
+    } else if (isMobile) {
       window.location.replace('toeic-mobile.html');
     } else {
       window.location.replace('toeic-typing.html');
@@ -56,7 +64,6 @@
     document.getElementById('manual').style.display = 'block';
   }
 
-  // Fallback: if redirect didn't work after 2 seconds, show manual links
   setTimeout(function() {
     document.getElementById('manual').style.display = 'block';
   }, 2000);
