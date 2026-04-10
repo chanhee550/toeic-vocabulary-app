@@ -18,10 +18,11 @@
     --border: #2a3050;
     --border-hover: #4a5580;
     --text-primary: #eef0f6;
-    --text-secondary: #8b92ab;
-    --text-dim: #5a6178;
-    --accent: #6c8cff;
-    --accent-hover: #5570e0;
+    --text-secondary: #b0b8d0;
+    --text-dim: #959db8;
+    --accent: #7b9aff;
+    --accent-hover: #6b8af0;
+    --accent-btn: #3d5abe;
     --accent-glow: rgba(108,140,255,0.15);
     --accent-soft: rgba(108,140,255,0.08);
     --green: #4ade80;
@@ -84,7 +85,7 @@
   }
   .nav button:hover { background: var(--accent-soft); color: var(--text-primary); }
   .nav button.active {
-    background: var(--accent); color: white; border-color: var(--accent);
+    background: var(--accent-btn); color: white; border-color: var(--accent-btn);
     box-shadow: 0 2px 12px rgba(108,140,255,0.3);
   }
   .nav select {
@@ -159,7 +160,7 @@
   }
   .category-filters button:hover { border-color: var(--accent); color: var(--text-primary); }
   .category-filters button.active {
-    background: var(--accent); color: white; border-color: var(--accent);
+    background: var(--accent-btn); color: white; border-color: var(--accent-btn);
   }
   .category-filters .filter-count { font-size: 0.72rem; color: var(--text-dim); margin-left: 3px; }
 
@@ -304,7 +305,7 @@
     font-weight: 500;
   }
   .pagination button:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--text-primary); }
-  .pagination button.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .pagination button.active { background: var(--accent-btn); color: white; border-color: var(--accent-btn); }
   .pagination button:disabled { opacity: 0.3; cursor: default; }
   .pagination button:disabled:hover { background: var(--bg-card); border-color: var(--border); color: var(--text-secondary); }
   .pagination .page-info { color: var(--text-dim); font-size: 0.82rem; margin: 0 8px; font-weight: 500; }
@@ -549,10 +550,15 @@
     .header-stats { gap: 8px; }
     .header-stats .stat { padding: 5px 8px; font-size: 0.72rem; }
   }
+  /* ===== FOCUS VISIBLE ===== */
+  *:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
 </style>
 </head>
 <body>
-<div class="header">
+<header class="header">
   <div style="display:flex; align-items:center; gap:12px;">
     <h1 onclick="goHome()" style="cursor:pointer;"><span>TOEIC</span> 영단어장</h1>
     <button onclick="toggleTheme()" id="themeBtn" style="background:var(--bg-elevated); border:1px solid var(--border); color:var(--text-secondary); padding:6px 12px; border-radius:var(--radius-full); cursor:pointer; font-size:0.8rem; font-family:inherit; transition:all 0.2s; min-width:60px; text-align:center;">Dark</button>
@@ -563,35 +569,35 @@
     <div class="stat">진행도 <span class="stat-value" id="progressPct">0</span>%</div>
     <div class="stat">정확도 <span class="stat-value" id="accuracy">0</span>%</div>
   </div>
-</div>
-<div class="nav">
+</header>
+<nav class="nav" aria-label="메인 네비게이션">
   <button id="btnList" class="active" onclick="switchMode('list')">단어 목록</button>
   <button id="btnTyping" onclick="switchMode('typing')">단어 학습</button>
   <button id="btnTest" onclick="switchMode('test')">테스트</button>
   <button id="btnSettings" onclick="toggleSettings()">설정</button>
   <button onclick="openAddWord()">단어 추가</button>
-  <select id="rangeSelect" onchange="changeRange()">
+  <select id="rangeSelect" onchange="changeRange()" aria-label="학습 범위 선택">
     <option value="all">전체 (1-2035)</option>
   </select>
-  <input type="text" class="search-box" id="searchBox" placeholder="단어 검색..." oninput="searchWords()">
-</div>
-<div class="container">
+  <input type="text" class="search-box" id="searchBox" placeholder="단어 검색..." oninput="searchWords()" aria-label="단어 검색">
+</nav>
+<main class="container">
   <div class="settings-panel" id="settingsPanel">
     <div class="settings-row">
       <label>반복 횟수:</label>
-      <input type="number" id="repeatCount" value="3" min="1" max="20" style="width:70px">
+      <input type="number" id="repeatCount" value="3" min="1" max="20" style="width:70px" aria-label="반복 횟수">
       <span style="color:#64748b; font-size:0.85rem">각 단어를 몇 번 타이핑할지</span>
     </div>
     <div class="settings-row">
       <label>학습 순서:</label>
-      <select id="orderSelect">
+      <select id="orderSelect" aria-label="학습 순서">
         <option value="sequential">순서대로</option>
         <option value="random">랜덤</option>
       </select>
     </div>
     <div class="settings-row">
       <label>뜻 표시:</label>
-      <select id="meaningDisplay">
+      <select id="meaningDisplay" aria-label="뜻 표시 방식">
         <option value="always">항상 표시</option>
         <option value="before">타이핑 전에만</option>
         <option value="hidden">숨기기 (영단어만)</option>
@@ -599,14 +605,14 @@
     </div>
     <div class="settings-row">
       <label>자동 넘김:</label>
-      <select id="autoNext">
+      <select id="autoNext" aria-label="자동 넘김 설정">
         <option value="yes">정답 시 자동 넘김</option>
         <option value="no">Enter로 넘기기</option>
       </select>
     </div>
     <div class="settings-row">
       <label>학습 카테고리:</label>
-      <select id="typingCategorySelect" onchange="updateTypingCategoryInfo()">
+      <select id="typingCategorySelect" onchange="updateTypingCategoryInfo()" aria-label="학습 카테고리">
         <option value="all">전체</option>
         <option value="none">미학습 단어</option>
         <option value="learned">학습 완료 단어</option>
@@ -647,9 +653,9 @@
       </div>
       <div class="char-preview" id="charPreview"></div>
       <div class="typing-input-area">
-        <input type="text" class="typing-input" id="typingInput" placeholder="여기에 타이핑하세요" autocomplete="off" spellcheck="false">
+        <input type="text" class="typing-input" id="typingInput" placeholder="여기에 타이핑하세요" autocomplete="off" spellcheck="false" aria-label="단어 타이핑 입력">
       </div>
-      <div class="typing-feedback" id="feedback"></div>
+      <div class="typing-feedback" id="feedback" aria-live="polite"></div>
       <div class="typing-controls">
         <button onclick="skipWord()">건너뛰기</button>
         <button onclick="resetTyping()" class="btn-primary">다시 시작</button>
@@ -675,7 +681,7 @@
       <div class="test-settings">
         <div class="settings-row">
           <label>문제 수:</label>
-          <select id="testQuestionCount">
+          <select id="testQuestionCount" aria-label="문제 수">
             <option value="10">10문제</option>
             <option value="20" selected>20문제</option>
             <option value="30">30문제</option>
@@ -685,7 +691,7 @@
         </div>
         <div class="settings-row">
           <label>출제 카테고리:</label>
-          <select id="testCategorySelect">
+          <select id="testCategorySelect" aria-label="출제 카테고리">
             <option value="all">전체</option>
             <option value="none">미학습 단어</option>
             <option value="learned">학습 완료 단어</option>
@@ -696,7 +702,7 @@
         <div class="settings-row">
           <label>자릿수 표시:</label>
           <label style="min-width:auto;cursor:pointer;display:flex;align-items:center;gap:6px;">
-            <input type="checkbox" id="testShowLength" style="width:18px;height:18px;cursor:pointer;accent-color:var(--accent,#6c8cff);">
+            <input type="checkbox" id="testShowLength" style="width:18px;height:18px;cursor:pointer;accent-color:var(--accent,#6c8cff);" aria-label="글자 수 박스 표시">
             <span style="color:var(--text-secondary,#8b92ab);font-size:0.85rem;">한→영 테스트 시 글자 수 박스 표시</span>
           </label>
         </div>
@@ -721,7 +727,7 @@
       <div class="test-question-sub" id="testQuestionSub"></div>
       <div id="testTypingArea">
         <div class="test-char-boxes" id="testCharBoxes"></div>
-        <input type="text" class="test-input" id="testInput" placeholder="정답을 입력하세요" autocomplete="off" spellcheck="false">
+        <input type="text" class="test-input" id="testInput" placeholder="정답을 입력하세요" autocomplete="off" spellcheck="false" aria-label="테스트 정답 입력">
       </div>
       <div id="testChoicesArea" style="display:none;"></div>
       <div class="test-answer-reveal" id="testAnswerReveal"></div>
@@ -781,25 +787,25 @@
     </div>
   </div>
 </div>
-<div class="dict-overlay" id="dictOverlay" onclick="if(event.target===this)closeDict()">
+<div class="dict-overlay" id="dictOverlay" onclick="if(event.target===this)closeDict()" role="dialog" aria-modal="true" aria-label="사전 검색">
   <div class="dict-panel">
     <div class="dict-header">
-      <h3 id="dictWord"></h3>
+      <h3 id="dictWord" aria-live="polite">사전</h3>
       <button class="dict-close" onclick="closeDict()">&times;</button>
     </div>
     <div id="dictContent"><div class="dict-loading">불러오는 중...</div></div>
   </div>
 </div>
-<div class="modal-overlay" id="addWordModal">
+<div class="modal-overlay" id="addWordModal" role="dialog" aria-modal="true" aria-label="단어 추가">
   <div class="modal">
     <h3>단어 추가</h3>
     <div class="modal-field">
       <label>영단어</label>
-      <input type="text" id="addWordEng" placeholder="예: accomplish" autocomplete="off">
+      <input type="text" id="addWordEng" placeholder="예: accomplish" autocomplete="off" aria-label="추가할 영단어">
     </div>
     <div class="modal-field">
       <label>한국어 뜻</label>
-      <input type="text" id="addWordKor" placeholder="예: (동)성취하다, 달성하다" autocomplete="off">
+      <input type="text" id="addWordKor" placeholder="예: (동)성취하다, 달성하다" autocomplete="off" aria-label="추가할 한국어 뜻">
     </div>
     <div class="modal-btns">
       <button class="m-cancel" onclick="closeAddWord()">취소</button>
@@ -1891,7 +1897,8 @@ loadSavedSettings();
 renderWordList();
 updateHeaderStats();
 </script>
-<footer style="text-align:center;padding:24px 16px 32px;color:var(--text-dim,#5a6178);font-size:0.75rem;line-height:1.6;">
+</main>
+<footer style="text-align:center;padding:24px 16px 32px;color:var(--text-dim,#7a82a0);font-size:0.75rem;line-height:1.6;">
   <div style="margin-bottom:4px;">Made by <strong style="color:var(--text-secondary,#8b92ab);">김찬희 (Kim Chanhee)</strong> &copy; 2026</div>
   <div>단어 데이터 출처: dokjongban.com &middot; MIT License</div>
 </footer>
