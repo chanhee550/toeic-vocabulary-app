@@ -1,2 +1,4 @@
 toeic_vocab.pdf
 toeic_data_compact.json
+node_modules/
+__pycache__/
