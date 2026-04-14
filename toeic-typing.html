@@ -1866,6 +1866,8 @@ function saveAddWord() {
   }
   var newWord = { word: eng, meaning: kor };
   ALL_WORDS.push(newWord);
+  // 범위 확장: 새 단어가 포함되도록
+  if (currentRange[1] < ALL_WORDS.length) currentRange[1] = ALL_WORDS.length;
   // Save to localStorage
   try {
     var cw = localStorage.getItem('toeic_custom_words');

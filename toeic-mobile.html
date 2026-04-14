@@ -1065,6 +1065,8 @@ function mSaveAdd(){
   if(W.some(function(w){return w.word.toLowerCase()===eng.toLowerCase();})){document.getElementById('maMsg').innerHTML='<span style="color:var(--amber);">이미 존재하는 단어</span>';return;}
   var nw={word:eng,meaning:kor};W.push(nw);
   try{var cw=localStorage.getItem('toeic_custom_words');var arr=cw?JSON.parse(cw):[];arr.push(nw);localStorage.setItem('toeic_custom_words',JSON.stringify(arr));}catch(e){}
+  // 범위 확장: 새 단어가 포함되도록 mRange[1]을 현재 W.length로 갱신
+  if(mRange[1]<W.length)mRange[1]=W.length;
   mFiltered=W.slice(mRange[0],mRange[1]);
   document.getElementById('maMsg').innerHTML='<span style="color:var(--green);"><b>'+eng+'</b> 추가!</span>';
   document.getElementById('maEng').value='';document.getElementById('maKor').value='';document.getElementById('maEng').focus();
