@@ -1076,6 +1076,9 @@ document.getElementById('maKor').addEventListener('keydown',function(e){if(e.key
 document.getElementById('addModal').addEventListener('click',function(e){if(e.target===this)mCloseAdd();});
 function loadCustomWords(){
   try{var cw=localStorage.getItem('toeic_custom_words');if(cw){var arr=JSON.parse(cw);arr.forEach(function(w){if(!W.some(function(aw){return aw.word.toLowerCase()===w.word.toLowerCase();}))W.push(w);});}}catch(e){}
+  // 커스텀 단어 로드 후 범위 및 필터 갱신
+  mRange=[0,W.length];
+  mFiltered=W.slice();
 }
 
 /* ===== INIT ===== */

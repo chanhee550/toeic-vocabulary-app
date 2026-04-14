@@ -1835,6 +1835,9 @@ function loadCustomWords() {
       });
     }
   } catch(e) {}
+  // 커스텀 단어 로드 후 범위 및 필터 갱신
+  currentRange = [0, ALL_WORDS.length];
+  filteredWords = [...ALL_WORDS];
 }
 function saveCustomWords() {
   try {
